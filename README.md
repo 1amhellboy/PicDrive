@@ -1,2 +1,2 @@
-# Google_Drive
-A google drive clone completely made by me
+# Pic_Drive
+A google drive alternative completely made by me
