@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  items Item[]
+  logs  ActivityLog[]
+}
+
+model Item {
+  id        String   @id @default(uuid())
+  name      String
+  type      ItemType
+  mimeType  String?
+  size      Int?
+  url       String?
+  createdAt DateTime @default(now())
+
+  // Self-relation for nested folder structure
+  parentId String?
+  parent   Item?   @relation("FolderChildren", fields: [parentId], references: [id])
+  children Item[]  @relation("FolderChildren")
+
+  // Belongs to a user
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Relations
+  shares Share[]
+  logs   ActivityLog[]
+}
+
+enum ItemType {
+  file
+  folder
+}
+
+model Share {
+  id         String     @id @default(uuid())
+  itemId     String
+  sharedWith String?
+  permission Permission
+  isPublic   Boolean    @default(false)
+  createdAt  DateTime   @default(now())
+
+  // Relation to Item
+  item Item @relation(fields: [itemId], references: [id])
+}
+
+enum Permission {
+  viewer
+  editor
+}
+
+model ActivityLog {
+  id        String         @id @default(uuid())
+  userId    String
+  itemId    String
+  action    ActivityAction
+  timestamp DateTime       @default(now())
+  details   String?
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+  item Item @relation(fields: [itemId], references: [id])
+}
+
+enum ActivityAction {
+  upload
+  delete
+  rename
+  move
+  share
+}
