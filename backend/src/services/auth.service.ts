@@ -4,6 +4,7 @@ import { sendResetEmail } from '../utils/email';
 import { Request, Response } from 'express';
 import { PrismaClient } from '../generated/prisma';
 
+
 const prisma = new PrismaClient();
 const SALT_ROUNDS = 10;
 
@@ -57,11 +58,40 @@ export const handlePasswordResetRequest = async (email: string) => {
 
 // Resets password after token verification.
 
+// export const handlePasswordReset = async (email: string, token: string, newPassword: string) => {
+//   const user = await prisma.user.findUnique({ where: { email } });
+
+//   if (!user || user.resetToken !== token || !user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
+//     throw new Error('Invalid or expired token');
+//   }
+
+//   const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+//   await prisma.user.update({
+//     where: { email },
+//     data: {
+//       password: hashedPassword,
+//       resetToken: null,
+//       resetTokenExpiry: null
+//     }
+//   });
+// };
+
+
 export const handlePasswordReset = async (email: string, token: string, newPassword: string) => {
+  if (!email || !token || !newPassword) {
+    throw new Error("Missing required fields");
+  }
+
   const user = await prisma.user.findUnique({ where: { email } });
 
-  if (!user || user.resetToken !== token || !user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
-    throw new Error('Invalid or expired token');
+  if (
+    !user ||
+    user.resetToken !== token ||
+    !user.resetTokenExpiry ||
+    user.resetTokenExpiry < new Date()
+  ) {
+    throw new Error("Invalid or expired token");
   }
 
   const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);

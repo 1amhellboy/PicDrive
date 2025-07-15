@@ -1,4 +1,4 @@
-import { PrismaClient } from '../generated/prisma';
+import { PrismaClient,Permission } from '../generated/prisma';
 
 const prisma = new PrismaClient();
 
@@ -53,7 +53,7 @@ export const getItemsByParent = async (parentId: string | null, userId: string) 
 };
 
 
-// Reanme an item
+// Rename an item
 
 export const renameItem = async (itemId: string, name: string, userId: string) => {
   try {
@@ -68,6 +68,14 @@ export const renameItem = async (itemId: string, name: string, userId: string) =
     if (result.count === 0) {
       throw new Error('Item not found or unauthorized');
     }
+    
+    await prisma.activityLog.create({
+        data: {
+          userId,
+          itemId,
+          action: 'rename',
+        },
+    });
 
     return result;
   } catch (error) {
@@ -98,3 +106,43 @@ export const deleteItem = async (itemId: string, userId: string) => {
     throw new Error('Failed to delete item');
   }
 };
+
+
+// Store shared item in DB
+
+export const createShare = async(userId:string,itemId:string, sharedWith:string, isPublic:boolean, permission:Permission)=>{
+  try{
+    const result =  await prisma.share.create({
+      data:{
+        itemId,
+        sharedWith: isPublic ? null : sharedWith,
+        isPublic,
+        permission,       
+      }
+    });
+        await prisma.activityLog.create({
+        data: {
+          userId,
+          itemId,
+          action: 'share',
+        },
+    });
+    console.log(result);
+    return result;
+
+  }  catch(err:any){
+      console.error('❌ Prisma Error:', err.message);
+      throw err;    
+  }
+
+}
+
+
+// Get Shared item from DB
+
+export const getShared = async(shareId:string)=>{
+  return await prisma.share.findUnique({
+    where:{id:shareId},
+    include:{item:true}
+  })
+}

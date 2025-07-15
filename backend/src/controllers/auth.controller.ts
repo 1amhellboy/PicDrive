@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import {registerUser, verifyUser, handlePasswordResetRequest, handlePasswordReset, logoutUser} from '../services/auth.service';
 import { generateToken,generateRefreshToken } from '../utils/jwt';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../generated/prisma';
+
 import { ref } from 'process';
 const prisma = new PrismaClient();
 
@@ -69,17 +70,24 @@ export const resetPassword = async (req: Request, res: Response) => {
 
 // Generate's a new access token when one is expired using refresh token logic
 
+
 export const refreshAcessToken = async (req:Request, res:Response) => {
   const {refreshToken} = req.body;
-  if(!refreshToken){res.status(400).json({error:"Refresh token is required"})}
+  if(!refreshToken){res.status(400).json({error:"Refresh token is required"});
+  return; 
+}
 
-  const user = await prisma.user.findFirst({where:refreshToken})
+  const user = await prisma.user.findFirst({where:{refreshToken}})
   
-  if(!user){res.status(400).json({error:"Invalid refresh token"})}
+  if(!user){res.status(400).json({error:"Invalid refresh token"}); 
+  return;
+}
 
   const newAcessToken = generateToken(user.id);
-  res.status(200).json({accessToken:newAcessToken})
+  res.status(200).json({accessToken:newAcessToken});
+  return;
 }
+
 
 
 // Logout  

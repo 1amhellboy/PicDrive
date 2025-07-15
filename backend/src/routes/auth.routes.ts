@@ -8,6 +8,6 @@ router.post("/login",Login);
 router.post("/logout",authenticate,Logout)
 router.post('/request-password-reset', requestPasswordReset);
 router.post('/reset-password', resetPassword);
-router.post('refresh',refreshAcessToken);
+router.post('/refresh',refreshAcessToken);
 
 export  default router;
