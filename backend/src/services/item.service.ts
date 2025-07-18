@@ -1,5 +1,5 @@
 import { PrismaClient,Permission } from '../generated/prisma';
-import { uploadFileToS3 } from '../utils/s3';
+import { uploadFileToS3,deleteFileFromS3 } from '../utils/s3';
 
 const prisma = new PrismaClient();
 
@@ -88,8 +88,32 @@ export const renameItem = async (itemId: string, name: string, userId: string) =
 
 // Delete an item
 
+// export const deleteItem = async (itemId: string, userId: string) => {
+//   try {
+//     const result = await prisma.item.deleteMany({
+//       where: {
+//         id: itemId,
+//         userId,
+//       },
+//     });
+
+//     if (result.count === 0) {
+//       throw new Error('Item not found or unauthorized');
+//     }
+
+//     return result;
+//   } catch (error) {
+//     console.error('Error deleting item:', error);
+//     throw new Error('Failed to delete item');
+//   }
+// };
+
 export const deleteItem = async (itemId: string, userId: string) => {
   try {
+    await prisma.activityLog.deleteMany({
+      where: { itemId }
+    });
+
     const result = await prisma.item.deleteMany({
       where: {
         id: itemId,
@@ -107,6 +131,7 @@ export const deleteItem = async (itemId: string, userId: string) => {
     throw new Error('Failed to delete item');
   }
 };
+
 
 
 // Store shared item in DB
@@ -132,7 +157,7 @@ export const createShare = async(userId:string,itemId:string, sharedWith:string,
     return result;
 
   }  catch(err:any){
-      console.error('❌ Prisma Error:', err.message);
+      console.error('Prisma Error:', err.message);
       throw err;    
   }
 
@@ -154,3 +179,6 @@ export const handleFileUpload = async (file: Express.Multer.File) => {
   const result = await uploadFileToS3(file);
   return result;
 };
+
+
+

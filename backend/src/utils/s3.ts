@@ -1,8 +1,7 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
 import path from 'path';
 import dotenv from 'dotenv';
-
 
 dotenv.config();
 
@@ -31,4 +30,12 @@ export const uploadFileToS3 = async (file: Express.Multer.File) => {
     key,
     url: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
   };
+};
+
+export const deleteFileFromS3 = async (key: string) => {
+  const command = new DeleteObjectCommand({
+    Bucket: process.env.AWS_BUCKET_NAME!,
+    Key: key,
+  });
+  await s3.send(command);
 };

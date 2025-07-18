@@ -1,5 +1,6 @@
 import {createItem, deleteItem, getItemsByParent, renameItem, createShare, getShared, handleFileUpload} from '../services/item.service';
 import {Request, Response} from 'express';
+import { deleteFileFromS3 } from '../utils/s3';
 import { userInfo } from 'os';
 import multer from 'multer';
 import { ItemType } from '../generated/prisma';
@@ -66,6 +67,23 @@ export const rename = async (req: Request, res: Response): Promise<void> => {
 };
 
 // Delete
+// export const remove = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const { id } = req.params;
+//     const userId = req.user?.id;
+
+//     if (!userId) {
+//       res.status(401).json({ message: 'Unauthorized: userId missing' });
+//       return;
+//     }
+
+//     await deleteItem(id, userId);
+//     res.status(204).json({ message: 'Item deleted successfully' });
+//   } catch (err: any) {
+//     res.status(500).json({ message: err.message || 'Failed to delete item' });
+//   }
+// };
+
 export const remove = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
@@ -76,8 +94,31 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // 1. Find the item in DB to get its S3 key
+    const item = await prisma.item.findUnique({
+      where: { id },
+    });
+
+    if (!item || item.userId !== userId) {
+      res.status(404).json({ message: 'Item not found or unauthorized' });
+      return;
+    }
+
+    // 2. Delete from DB
     await deleteItem(id, userId);
-    res.status(204).json({ message: 'Item deleted successfully' });
+
+    // 3. If it's a file, delete from S3
+    if (item.type === 'file' && item.url) {
+      try {
+        const key = item.url.split('/').pop(); // extract the key from the URL
+        if (key) await deleteFileFromS3(key);
+      } catch (s3Error) {
+        console.error("S3 deletion failed:", s3Error);
+        // Not throwing here because DB deletion was successful
+      }
+    }
+
+    res.status(200).json({ message: 'Item deleted successfully' });
   } catch (err: any) {
     res.status(500).json({ message: err.message || 'Failed to delete item' });
   }
@@ -140,20 +181,19 @@ export const accessSharedItem = async (req: Request, res: Response): Promise<voi
 // Upload to AWS
 
 export const uploadFile = async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  if (!userId) {res.status(401).json({ error: "Unauthorized" })
+    return;
+  }
+
+  if (!req.file) { res.status(400).json({ error: "File is required" })
+    return;
+  }
+
+  let uploaded;
   try {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
-
-    if (!req.file) {
-      res.status(400).json({ error: "File is required" });
-      return;
-    }
-
     // 1. Upload to S3
-    const uploaded = await handleFileUpload(req.file);
+    uploaded = await handleFileUpload(req.file);
 
     // 2. Save metadata in DB
     const savedItem = await createItem(
@@ -180,7 +220,17 @@ export const uploadFile = async (req: Request, res: Response) => {
       file: savedItem,
     });
   } catch (error) {
-    console.error("Upload error:", error);
-    res.status(500).json({ error: "Upload failed" });
+    console.error("Upload failed:", error);
+
+    // Rollback: delete file from S3 if DB operation failed
+    if (uploaded?.key) {
+      try {
+        await deleteFileFromS3(uploaded.key);
+      } catch (s3Error) {
+        console.error("Rollback failed: Could not delete from S3", s3Error);
+      }
+    }
+
+    res.status(500).json({ error: "Upload failed, rolled back" });
   }
 };

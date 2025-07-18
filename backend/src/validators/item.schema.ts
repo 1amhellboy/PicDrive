@@ -18,8 +18,7 @@ export const RenameItemSchema = z.object({
 });
 
 export const DeleteItemSchema = z.object({
-  itemId: z.string().uuid(),
-  userId: z.string().uuid()
+  id: z.string().uuid(), // matches req.params.id
 });
 
 export const ShareItemSchema = z.object({
