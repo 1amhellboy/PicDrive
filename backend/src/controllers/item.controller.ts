@@ -1,7 +1,13 @@
-import { Prisma } from '@prisma/client';
-import {createItem, deleteItem, getItemsByParent, renameItem, createShare, getShared} from '../services/item.service';
+import {createItem, deleteItem, getItemsByParent, renameItem, createShare, getShared, handleFileUpload} from '../services/item.service';
 import {Request, Response} from 'express';
 import { userInfo } from 'os';
+import multer from 'multer';
+import { ItemType } from '../generated/prisma';
+import { PrismaClient } from '../generated/prisma';
+const prisma = new PrismaClient();
+
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 
 // Create (file or folder)
@@ -127,5 +133,54 @@ export const accessSharedItem = async (req: Request, res: Response): Promise<voi
     res.status(200).json(share.item);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+
+// Upload to AWS
+
+export const uploadFile = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    if (!req.file) {
+      res.status(400).json({ error: "File is required" });
+      return;
+    }
+
+    // 1. Upload to S3
+    const uploaded = await handleFileUpload(req.file);
+
+    // 2. Save metadata in DB
+    const savedItem = await createItem(
+      req.file.originalname,
+      "file",
+      userId,
+      req.body.parentId || null,
+      req.file.mimetype,
+      req.file.size,
+      uploaded.url
+    );
+
+    // 3. Log activity (upload)
+    await prisma.activityLog.create({
+      data: {
+        userId,
+        itemId: savedItem.id,
+        action: "upload",
+      },
+    });
+
+    res.status(201).json({
+      message: "Upload successful",
+      file: savedItem,
+    });
+  } catch (error) {
+    console.error("Upload error:", error);
+    res.status(500).json({ error: "Upload failed" });
   }
 };

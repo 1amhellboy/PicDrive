@@ -1,4 +1,5 @@
 import { PrismaClient,Permission } from '../generated/prisma';
+import { uploadFileToS3 } from '../utils/s3';
 
 const prisma = new PrismaClient();
 
@@ -146,3 +147,10 @@ export const getShared = async(shareId:string)=>{
     include:{item:true}
   })
 }
+
+// Upload file to cloud
+
+export const handleFileUpload = async (file: Express.Multer.File) => {
+  const result = await uploadFileToS3(file);
+  return result;
+};
