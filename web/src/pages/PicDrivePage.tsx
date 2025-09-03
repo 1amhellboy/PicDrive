@@ -17,29 +17,12 @@ export default function PicDrivePage() {
   const [currentPage, setCurrentPage] = useState("mydrive")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
 
-  const handleNavigation = (page: string) => {
-    setCurrentPage(page)
-  }
-
-  const handleUploadClick = () => {
-    setCurrentPage("upload")
-  }
-
-  const handleNewFolderClick = () => {
-    setCurrentPage("newfolder")
-  }
-
-  const handleSettingsClick = () => {
-    setCurrentPage("settings")
-  }
-
-  const handleProfileClick = () => {
-    setCurrentPage("profile")
-  }
-
-  const handleViewModeChange = (mode: "grid" | "list") => {
-    setViewMode(mode)
-  }
+  const handleNavigation = (page: string) => setCurrentPage(page)
+  const handleUploadClick = () => setCurrentPage("upload")
+  const handleNewFolderClick = () => setCurrentPage("newfolder")
+  const handleSettingsClick = () => setCurrentPage("settings")
+  const handleProfileClick = () => setCurrentPage("profile")
+  const handleViewModeChange = (mode: "grid" | "list") => setViewMode(mode)
 
   const renderCurrentPage = () => {
     switch (currentPage) {
@@ -67,7 +50,7 @@ export default function PicDrivePage() {
   }
 
   return (
-    <div className="h-screen flex bg-gray-50">
+    <div className="h-screen flex bg-gray-50 w-full">
       {/* Sidebar */}
       <Sidebar activeItem={currentPage} onItemClick={handleNavigation} />
 
@@ -84,7 +67,11 @@ export default function PicDrivePage() {
         />
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto">{renderCurrentPage()}</main>
+        <main className="flex-1 h-full w-full bg-gray-50 overflow-hidden">
+          <div className="h-full w-full overflow-y-auto">
+            {renderCurrentPage()}
+          </div>
+        </main>
       </div>
     </div>
   )

@@ -27,7 +27,7 @@ const MyDrive: React.FC<MyDriveProps> = ({ viewMode }) => {
   ]
 
   return (
-    <div className="p-6 bg-white min-h-screen">
+    <div className="p-6 bg-white min-h-screen w-full">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-normal text-black">My Drive</h1>

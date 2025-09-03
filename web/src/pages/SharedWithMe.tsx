@@ -5,7 +5,6 @@ import FileCard from "../components/FileCard"
 import FolderCard from "../components/FolderCard"
 
 const SharedWithMe: React.FC = () => {
-  // Mock data for shared items
   const sharedFolders = [
     { name: "Team Project", itemCount: 25, modifiedDate: "1 day ago" },
     { name: "Marketing Assets", itemCount: 18, modifiedDate: "3 days ago" },
@@ -19,7 +18,7 @@ const SharedWithMe: React.FC = () => {
   ]
 
   return (
-    <div className="p-6">
+    <div className="h-full w-full p-6 overflow-y-auto">
       <h1 className="text-2xl font-semibold text-gray-900 mb-6">Shared with me</h1>
 
       {sharedFolders.length > 0 && (

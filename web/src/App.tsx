@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login'; // make sure the path is correct
 import Signup from './pages/Signup';
 import PicDrivePage from './pages/PicDrivePage';
-import Component from "./pages/hero";
+// import Component from "./pages/hero";
 
 
 // import Dashboard from './pages/Dashboard';
