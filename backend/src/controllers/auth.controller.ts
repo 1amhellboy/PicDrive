@@ -90,6 +90,9 @@ export const Login = async (req: Request, res: Response) => {
     const token = generateToken(user.id);
     const refreshToken = generateRefreshToken();
 
+    console.log(token);
+    // console.log(refreshToken);
+
     // Store the refresh token in the database
     await prisma.user.update({
       where:{id:user.id},

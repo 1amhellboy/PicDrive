@@ -1,308 +1,18 @@
 // "use client"
 
-// import type React from "react"
-// import { useState, useEffect } from "react"
-// import { useNavigate, useLocation } from "react-router-dom"
-// import { Button } from "@/components/ui/button1"
-// import { Input } from "@/components/ui/input1"
-// import { Label } from "@/components/ui/label1"
-// import { Card, CardContent } from "@/components/ui/card1"
-// import { Badge } from "@/components/ui/badge1"
-// import { CheckCircle, Upload, FolderOpen, Share2 } from "lucide-react"
-// import { registerUser } from "@/lib/api"
-// import { loginUser } from "@/lib/api"
-
-// export function Auth() {
-//   const navigate = useNavigate()
-//   const location = useLocation()
-//   const isSignup = location.pathname === "/signup"
-  
-//   // Signup form state
-//   const [signupData, setSignupData] = useState({
-//     // fullName: "",
-//     email: "",
-//     username: "",
-//     password: "",
-//     // confirmPassword: "",
-//   })
-  
-//   // Login form state
-//   const [loginData, setLoginData] = useState({
-//     username: "",
-//     password: "",
-//   })
-
-//   const handleSignupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     setSignupData((prev) => ({
-//       ...prev,
-//       [e.target.name]: e.target.value,
-//     }))
-//   }
-
-//   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     setLoginData((prev) => ({
-//       ...prev,
-//       [e.target.name]: e.target.value,
-//     }))
-//   }
-
-//   const handleSignupSubmit = (e: React.FormEvent) => {
-//     e.preventDefault()
-//     console.log("Signup attempt:", signupData)
-//     // Handle signup logic here
-//   }
-
-//   const handleLoginSubmit = (e: React.FormEvent) => {
-//     e.preventDefault()
-//     console.log("Login attempt:", loginData)
-//     // Handle login logic here
-//   }
-
-//   const handleNavigateToLogin = () => {
-//     navigate("/login")
-//   }
-
-//   const handleNavigateToSignup = () => {
-//     navigate("/signup")
-//   }
-
-//   return (
-//     <div className="min-h-screen bg-gray-50 flex">
-//       {/* Left side - Brand and features */}
-//       <div className="flex-1 flex flex-col justify-center px-12 py-16">
-//         <div className="max-w-lg">
-//           {/* AI Badge */}
-//           <Badge variant="secondary" className="mb-8 bg-blue-50 text-blue-700 border-blue-200">
-//             <CheckCircle className="w-4 h-4 mr-2" />
-//             Now with AI-powered organization
-//           </Badge>
-
-//           {/* Main heading */}
-//           <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
-//             PicDrive - Your cloud,
-//             <br />
-//             your control.
-//           </h1>
-
-//           {/* Description */}
-//           <p className="text-lg text-gray-600 mb-12 leading-relaxed">
-//             Store, sync, and share your photos and files securely in the cloud. Access your memories and documents from
-//             any device, anywhere in the world.
-//           </p>
-
-//           {/* Features */}
-//           <div className="space-y-4">
-//             <div className="flex items-center gap-3">
-//               <div className="w-2 h-2 bg-gray-900 rounded-full"></div>
-//               <span className="text-gray-700 font-medium flex items-center gap-2">
-//                 <Upload className="w-4 h-4" />
-//                 Upload files
-//               </span>
-//             </div>
-//             <div className="flex items-center gap-3">
-//               <div className="w-2 h-2 bg-gray-900 rounded-full"></div>
-//               <span className="text-gray-700 font-medium flex items-center gap-2">
-//                 <FolderOpen className="w-4 h-4" />
-//                 Manage folders
-//               </span>
-//             </div>
-//             <div className="flex items-center gap-3">
-//               <div className="w-2 h-2 bg-gray-900 rounded-full"></div>
-//               <span className="text-gray-700 font-medium flex items-center gap-2">
-//                 <Share2 className="w-4 h-4" />
-//                 Share with anyone
-//               </span>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Right side - Auth form */}
-//       <div className="flex-1 flex items-center justify-center px-12 py-16">
-//         <Card className="w-full max-w-md border-0 shadow-lg">
-//           <CardContent className="p-8">
-//             <div className="text-center mb-8">
-//               <h2 className="text-2xl font-semibold text-gray-900">
-//                 {isSignup ? "Sign Up" : "Login"}
-//               </h2>
-//             </div>
-
-//             {isSignup ? (
-//               // Signup Form
-//               <form onSubmit={handleSignupSubmit} className="space-y-6">
-//                 {/* <div className="space-y-2">
-//                   <Label htmlFor="fullName" className="text-gray-700">
-//                     Full Name
-//                   </Label>
-//                   <Input
-//                     id="fullName"
-//                     name="fullName"
-//                     type="text"
-//                     value={signupData.fullName}
-//                     onChange={handleSignupChange}
-//                     className="h-12 border-gray-200 focus:border-gray-400"
-//                     required
-//                   />
-//                 </div> */}
-
-//                 <div className="space-y-2">
-//                   <Label htmlFor="email" className="text-gray-700">
-//                     Email
-//                   </Label>
-//                   <Input
-//                     id="email"
-//                     name="email"
-//                     type="email"
-//                     value={signupData.email}
-//                     onChange={handleSignupChange}
-//                     className="h-12 border-gray-200 focus:border-gray-400"
-//                     required
-//                   />
-//                 </div>
-
-//                 <div className="space-y-2">
-//                   <Label htmlFor="username" className="text-gray-700">
-//                     Username
-//                   </Label>
-//                   <Input
-//                     id="username"
-//                     name="username"
-//                     type="text"
-//                     value={signupData.username}
-//                     onChange={handleSignupChange}
-//                     className="h-12 border-gray-200 focus:border-gray-400"
-//                     required
-//                   />
-//                 </div>
-
-//                 <div className="space-y-2">
-//                   <Label htmlFor="password" className="text-gray-700">
-//                     Password
-//                   </Label>
-//                   <Input
-//                     id="password"
-//                     name="password"
-//                     type="password"
-//                     value={signupData.password}
-//                     onChange={handleSignupChange}
-//                     className="h-12 border-gray-200 focus:border-gray-400"
-//                     required
-//                   />
-//                 </div>
-
-//                 {/* <div className="space-y-2">
-//                   <Label htmlFor="confirmPassword" className="text-gray-700">
-//                     Confirm Password
-//                   </Label>
-//                   <Input
-//                     id="confirmPassword"
-//                     name="confirmPassword"
-//                     type="password"
-//                     value={signupData.confirmPassword}
-//                     onChange={handleSignupChange}
-//                     className="h-12 border-gray-200 focus:border-gray-400"
-//                     required
-//                   />
-//                 </div> */}
-
-//                 <Button type="submit" className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium">
-//                   Create Account
-//                 </Button>
-
-//                 {/* <div className="text-center">
-//                   <span className="text-gray-600">Join PicDrive today</span>
-//                 </div> */}
-//               </form>
-//             ) : (
-//               // Login Form
-//               <form onSubmit={handleLoginSubmit} className="space-y-6">
-//                 <div className="space-y-2">
-//                   <Label htmlFor="username" className="text-gray-700">
-//                     Username
-//                   </Label>
-//                   <Input
-//                     id="username"
-//                     name="username"
-//                     type="text"
-//                     value={loginData.username}
-//                     onChange={handleLoginChange}
-//                     className="h-12 border-gray-200 focus:border-gray-400"
-//                     required
-//                   />
-//                 </div>
-
-//                 <div className="space-y-2">
-//                   <Label htmlFor="password" className="text-gray-700">
-//                     Password
-//                   </Label>
-//                   <Input
-//                     id="password"
-//                     name="password"
-//                     type="password"
-//                     value={loginData.password}
-//                     onChange={handleLoginChange}
-//                     className="h-12 border-gray-200 focus:border-gray-400"
-//                     required
-//                   />
-//                 </div>
-
-//                 <Button type="submit" className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium">
-//                   Login
-//                 </Button>
-
-//                 <div className="text-center">
-//                   <span className="text-gray-600">to PicDrive</span>
-//                 </div>
-//               </form>
-//             )}
-
-//             <div className="mt-8 text-center">
-//               <p className="text-gray-600">
-//                 {isSignup ? (
-//                   <>
-//                     Already have an account?{" "}
-//                     <button 
-//                       onClick={handleNavigateToLogin}
-//                       className="text-blue-600 hover:text-blue-700 font-medium"
-//                     >
-//                       Login
-//                     </button>
-//                   </>
-//                 ) : (
-//                   <>
-//                     Don't have an account?{" "}
-//                     <button 
-//                       onClick={handleNavigateToSignup}
-//                       className="text-blue-600 hover:text-blue-700 font-medium"
-//                     >
-//                       Sign up
-//                     </button>
-//                   </>
-//                 )}
-//               </p>
-//             </div>
-//           </CardContent>
-//         </Card>
-//       </div>
-//     </div>
-//   )
-// }
-
-
-// "use client"
-
 // import React, { useState } from 'react'
 // import { useNavigate, useLocation } from 'react-router-dom'
-// import { registerUser } from '@/lib/api' // Make sure this path matches your project
-// import { loginUser } from '@/lib/api' // Placeholder for login API
+// import { registerUser, loginUser } from '@/lib/api' // Make sure this path matches your project
 // import { Button } from "@/components/ui/button1"
 // import { Input } from "@/components/ui/input1"
 // import { Label } from "@/components/ui/label1"
 // import { Card, CardContent } from "@/components/ui/card1"
 // import { Badge } from "@/components/ui/badge1"
 // import { CheckCircle, Upload, FolderOpen, Share2 } from "lucide-react"
+// import { useAuth } from "../context/AuthContext"; 
 
 // function Auth() {
+//   const { login } = useAuth(); // <-- use context login
 //   const navigate = useNavigate()
 //   const location = useLocation()
 //   const isSignup = location.pathname === "/signup"
@@ -316,7 +26,7 @@
   
 //   // Login form state
 //   const [loginData, setLoginData] = useState({
-//     username: "",
+//     email: "",
 //     password: "",
 //   })
 
@@ -370,18 +80,16 @@
 //     setLoading(true)
 
 //     try {
-//        const response = await loginUser(loginData.username, loginData.password)
-
-//        if(response.token) {
-//         localStorage.setItem('token', response.token)
-//        }
-//          if(response.user) {
-//         localStorage.setItem('user', JSON.stringify(response.user))
-//        }
-       
-//        navigate('/dashboard') // Redirect to dashboard after login
+//       const response = await loginUser(loginData.email, loginData.password)
+      
+//       // Store auth info
+//       localStorage.setItem('token', response.token)
+//       localStorage.setItem('user', JSON.stringify(response.user))
+      
+//       // Redirect to dashboard after successful login
+//       navigate('/dashboard')
 //     } catch (err: any) {
-//       console.error(err)
+//       console.error(err) // Log actual error
 //       setError(err.message || 'Login failed')
 //     } finally {
 //       setLoading(false)
@@ -521,23 +229,23 @@
 //                 >
 //                   {loading ? 'Signing up...' : 'Create Account'}
 //                 </Button>
-
+// {/* 
 //                 <div className="text-center">
 //                   <span className="text-gray-600">Join PicDrive today</span>
-//                 </div>
+//                 </div> */}
 //               </form>
 //             ) : (
 //               // Login Form
 //               <form onSubmit={handleLoginSubmit} className="space-y-6">
 //                 <div className="space-y-2">
-//                   <Label htmlFor="username" className="text-gray-700">
-//                     Username
+//                   <Label htmlFor="email" className="text-gray-700">
+//                     Email
 //                   </Label>
 //                   <Input
-//                     id="username"
-//                     name="username"
-//                     type="text"
-//                     value={loginData.username}
+//                     id="email"
+//                     name="email"
+//                     type="email"
+//                     value={loginData.email}
 //                     onChange={handleLoginChange}
 //                     className="h-12 border-gray-200 focus:border-gray-400"
 //                     required
@@ -567,9 +275,9 @@
 //                   {loading ? 'Logging in...' : 'Login'}
 //                 </Button>
 
-//                 <div className="text-center">
+//                 {/* <div className="text-center">
 //                   <span className="text-gray-600">to PicDrive</span>
-//                 </div>
+//                 </div> */}
 //               </form>
 //             )}
 
@@ -607,131 +315,105 @@
 
 // export default Auth;
 
-"use client"
+"use client";
 
-import React, { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
-import { registerUser, loginUser } from '@/lib/api' // Make sure this path matches your project
-import { Button } from "@/components/ui/button1"
-import { Input } from "@/components/ui/input1"
-import { Label } from "@/components/ui/label1"
-import { Card, CardContent } from "@/components/ui/card1"
-import { Badge } from "@/components/ui/badge1"
-import { CheckCircle, Upload, FolderOpen, Share2 } from "lucide-react"
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { registerUser } from "@/lib/api"; // Signup still calls api directly
+import { useAuth } from "../context/AuthContext"; // Context for login
+import { Button } from "@/components/ui/button1";
+import { Input } from "@/components/ui/input1";
+import { Label } from "@/components/ui/label1";
+import { Card, CardContent } from "@/components/ui/card1";
+import { Badge } from "@/components/ui/badge1";
+import { CheckCircle, Upload, FolderOpen, Share2 } from "lucide-react";
 
 function Auth() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const isSignup = location.pathname === "/signup"
-  
-  // Signup form state
-  const [signupData, setSignupData] = useState({
-    email: "",
-    password: "",
-    name: "",
-  })
-  
-  // Login form state
-  const [loginData, setLoginData] = useState({
-    email: "",
-    password: "",
-  })
+  const { login } = useAuth(); // Context login for dashboard access
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isSignup = location.pathname === "/signup";
+  const from = (location.state as any)?.from?.pathname || "/dashboard";
 
-  // Loading and error states
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+  // Signup state
+  const [signupData, setSignupData] = useState({ email: "", password: "", name: "" });
+  // Login state
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSignupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSignupData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }))
-  }
+    setSignupData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLoginData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }))
-  }
+    setLoginData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
+  // Signup handler
   const handleSignupSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
     try {
-      const response = await registerUser(signupData.email, signupData.password, signupData.name)
+      const response = await registerUser(signupData.email, signupData.password, signupData.name);
 
-      // Store auth info (if backend returns it)
-      if (response.token) {
-        localStorage.setItem('token', response.token)
-      }
-      if (response.user) {
-        localStorage.setItem('user', JSON.stringify(response.user))
-      }
+      // Optional: auto-login after signup
+      await login(signupData.email, signupData.password);
 
-      // Redirect to login after successful signup
-      navigate('/login')
+      navigate("/dashboard"); // redirect to dashboard after signup + login
     } catch (err: any) {
-      console.error(err)
-      setError(err.message || 'Signup failed')
+      console.error(err);
+      setError(err.message || "Signup failed");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const handleLoginSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
+  // Login handler
+const handleLoginSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError("");
+  setLoading(true);
 
-    try {
-      const response = await loginUser(loginData.email, loginData.password)
-      
-      // Store auth info
-      localStorage.setItem('token', response.token)
-      localStorage.setItem('user', JSON.stringify(response.user))
-      
-      // Redirect to dashboard after successful login
-      navigate('/dashboard')
-    } catch (err: any) {
-      console.error(err) // Log actual error
-      setError(err.message || 'Login failed')
-    } finally {
-      setLoading(false)
-    }
+  try {
+    await login(loginData.email, loginData.password); // Context login
+    navigate("/dashboard"); // always go to dashboard
+  } catch (err: any) {
+    console.error(err);
+    setError(err.message || "Login failed");
+  } finally {
+    setLoading(false);
   }
+};
+
 
   const handleNavigateToLogin = () => {
-    setError("") // Clear error when switching forms
-    navigate("/login")
-  }
+    setError("");
+    navigate("/login");
+  };
 
   const handleNavigateToSignup = () => {
-    setError("") // Clear error when switching forms
-    navigate("/signup")
-  }
+    setError("");
+    navigate("/signup");
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Left side - Brand and features */}
+      {/* Left side */}
       <div className="flex-1 flex flex-col justify-center px-12 py-16">
         <div className="max-w-lg">
-          {/* AI Badge */}
           <Badge variant="secondary" className="mb-8 bg-blue-50 text-blue-700 border-blue-200">
             <CheckCircle className="w-4 h-4 mr-2" />
             Now with AI-powered organization
           </Badge>
 
-          {/* Main heading */}
           <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
-            PicDrive - Your cloud,
-            <br />
+            PicDrive - Your cloud,<br />
             your control.
           </h1>
 
-          {/* Description */}
           <p className="text-lg text-gray-600 mb-12 leading-relaxed">
             Store, sync, and share your photos and files securely in the cloud. Access your memories and documents from
             any device, anywhere in the world.
@@ -742,29 +424,26 @@ function Auth() {
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-gray-900 rounded-full"></div>
               <span className="text-gray-700 font-medium flex items-center gap-2">
-                <Upload className="w-4 h-4" />
-                Upload files
+                <Upload className="w-4 h-4" /> Upload files
               </span>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-gray-900 rounded-full"></div>
               <span className="text-gray-700 font-medium flex items-center gap-2">
-                <FolderOpen className="w-4 h-4" />
-                Manage folders
+                <FolderOpen className="w-4 h-4" /> Manage folders
               </span>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-gray-900 rounded-full"></div>
               <span className="text-gray-700 font-medium flex items-center gap-2">
-                <Share2 className="w-4 h-4" />
-                Share with anyone
+                <Share2 className="w-4 h-4" /> Share with anyone
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Right side - Auth form */}
+      {/* Right side - Form */}
       <div className="flex-1 flex items-center justify-center px-12 py-16">
         <Card className="w-full max-w-md border-0 shadow-lg">
           <CardContent className="p-8">
@@ -774,7 +453,6 @@ function Auth() {
               </h2>
             </div>
 
-            {/* Error Message */}
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
                 <p className="text-red-600 text-sm">{error}</p>
@@ -782,134 +460,65 @@ function Auth() {
             )}
 
             {isSignup ? (
-              // Signup Form
               <form onSubmit={handleSignupSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-gray-700">
-                    Full Name
-                  </Label>
+                  <Label htmlFor="name" className="text-gray-700">Full Name</Label>
                   <Input
-                    id="name"
-                    name="name"
-                    type="text"
-                    value={signupData.name}
-                    onChange={handleSignupChange}
-                    className="h-12 border-gray-200 focus:border-gray-400"
-                    required
+                    id="name" name="name" type="text" value={signupData.name} onChange={handleSignupChange}
+                    className="h-12 border-gray-200 focus:border-gray-400" required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-700">
-                    Email
-                  </Label>
+                  <Label htmlFor="email" className="text-gray-700">Email</Label>
                   <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={signupData.email}
-                    onChange={handleSignupChange}
-                    className="h-12 border-gray-200 focus:border-gray-400"
-                    required
+                    id="email" name="email" type="email" value={signupData.email} onChange={handleSignupChange}
+                    className="h-12 border-gray-200 focus:border-gray-400" required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-700">
-                    Password
-                  </Label>
+                  <Label htmlFor="password" className="text-gray-700">Password</Label>
                   <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    value={signupData.password}
-                    onChange={handleSignupChange}
-                    className="h-12 border-gray-200 focus:border-gray-400"
-                    required
+                    id="password" name="password" type="password" value={signupData.password} onChange={handleSignupChange}
+                    className="h-12 border-gray-200 focus:border-gray-400" required
                   />
                 </div>
 
-                <Button 
-                  type="submit" 
-                  disabled={loading}
-                  className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium disabled:opacity-50"
-                >
-                  {loading ? 'Signing up...' : 'Create Account'}
+                <Button type="submit" disabled={loading} className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium disabled:opacity-50">
+                  {loading ? "Signing up..." : "Create Account"}
                 </Button>
-{/* 
-                <div className="text-center">
-                  <span className="text-gray-600">Join PicDrive today</span>
-                </div> */}
               </form>
             ) : (
-              // Login Form
               <form onSubmit={handleLoginSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-700">
-                    Email
-                  </Label>
+                  <Label htmlFor="email" className="text-gray-700">Email</Label>
                   <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={loginData.email}
-                    onChange={handleLoginChange}
-                    className="h-12 border-gray-200 focus:border-gray-400"
-                    required
+                    id="email" name="email" type="email" value={loginData.email} onChange={handleLoginChange}
+                    className="h-12 border-gray-200 focus:border-gray-400" required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-700">
-                    Password
-                  </Label>
+                  <Label htmlFor="password" className="text-gray-700">Password</Label>
                   <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    value={loginData.password}
-                    onChange={handleLoginChange}
-                    className="h-12 border-gray-200 focus:border-gray-400"
-                    required
+                    id="password" name="password" type="password" value={loginData.password} onChange={handleLoginChange}
+                    className="h-12 border-gray-200 focus:border-gray-400" required
                   />
                 </div>
 
-                <Button 
-                  type="submit" 
-                  disabled={loading}
-                  className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium disabled:opacity-50"
-                >
-                  {loading ? 'Logging in...' : 'Login'}
+                <Button type="submit" disabled={loading} className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium disabled:opacity-50">
+                  {loading ? "Logging in..." : "Login"}
                 </Button>
-
-                {/* <div className="text-center">
-                  <span className="text-gray-600">to PicDrive</span>
-                </div> */}
               </form>
             )}
 
             <div className="mt-8 text-center">
               <p className="text-gray-600">
                 {isSignup ? (
-                  <>
-                    Already have an account?{" "}
-                    <button 
-                      onClick={handleNavigateToLogin}
-                      className="text-blue-600 hover:text-blue-700 font-medium"
-                    >
-                      Login
-                    </button>
-                  </>
+                  <>Already have an account? <button onClick={handleNavigateToLogin} className="text-blue-600 hover:text-blue-700 font-medium">Login</button></>
                 ) : (
-                  <>
-                    Don't have an account?{" "}
-                    <button 
-                      onClick={handleNavigateToSignup}
-                      className="text-blue-600 hover:text-blue-700 font-medium"
-                    >
-                      Sign up
-                    </button>
-                  </>
+                  <>Don't have an account? <button onClick={handleNavigateToSignup} className="text-blue-600 hover:text-blue-700 font-medium">Sign up</button></>
                 )}
               </p>
             </div>
@@ -917,7 +526,7 @@ function Auth() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
 
 export default Auth;
