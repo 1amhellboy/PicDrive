@@ -29,13 +29,13 @@ export default function PicDrivePage() {
       case "mydrive":
         return <MyDrive viewMode={viewMode} />
       case "shared":
-        return <SharedWithMe />
+        return <SharedWithMe viewMode={viewMode} />
       case "recent":
-        return <Recent />
+        return <Recent viewMode={viewMode} />
       case "starred":
-        return <Starred />
+        return <Starred viewMode={viewMode}/>
       case "trash":
-        return <Trash />
+        return <Trash viewMode={viewMode}/>
       case "upload":
         return <Upload />
       case "newfolder":

@@ -20,7 +20,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeItem, onItemClick }) => {
   return (
     <div className="w-60 bg-white border-r border-gray-200 h-full flex flex-col">
       <div className="p-3">
-        <div className="w-full bg-black text-white px-3 py-2 rounded-lg font-large text-left text-sm">PicDrive</div>
+        <div className="w-full bg-black text-white px-3 py-2 rounded-lg font-large text-left text-m">PicDrive</div>
       </div>
 
       <nav className="flex-1 px-2">

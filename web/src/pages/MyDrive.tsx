@@ -39,8 +39,8 @@ const MyDrive: React.FC<MyDriveProps> = ({ viewMode }) => {
         <div className="bg-white">
           <div className="flex items-center px-4 py-3 border-b border-gray-100 text-sm font-medium text-gray-600">
             <div className="flex-1">Name</div>
-            <div className="w-32 text-right">Modified</div>
-            <div className="w-20 text-right">Size</div>
+            <div className="w-32 text-left">Modified</div>
+            <div className="w-20 text-left">Size</div>
             <div className="w-8"></div>
           </div>
           <div>

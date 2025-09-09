@@ -1,88 +1,92 @@
-import { Button } from "../components/ui/button"
-import { Badge } from "../components/ui/badge"
-import { Zap } from "lucide-react"
-import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { useNavigate } from "react-router-dom"
 
 
 export default function Component() {
+  const navigate = useNavigate()
+
+  const handleNavigateToLogin = () => {
+    navigate("/login")
+  }
+
+  const handleNavigateToSignup = () => {
+    navigate("/signup")
+  }
+  
   return (
-    <section className="w-full py-8 md:py-16 lg:py-20 xl:py-24">
-      <div className="container px-4 md:px-6">
-        <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
-          <div className="flex flex-col justify-center space-y-4">
-            <div className="space-y-2">
-              <Badge variant="secondary" className="w-fit">
-                <Zap className="w-3 h-3 mr-1" />
-                Now with AI-powered organization
-              </Badge>
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                <span className="text-primary">PicDrive</span> - Your cloud, your control.
-              </h1>
-              <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                Store, sync, and share your photos and files securely in the cloud. Access your memories and documents
-                from any device, anywhere in the world.
-              </p>
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* Main content */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="max-w-2xl w-full">
+          {/* AI-powered organization badge */}
+          <div className="flex items-center gap-2 mb-8">
+            <div className="w-4 h-4 bg-black rounded-full flex items-center justify-center">
+              <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
             </div>
-
-            <div className="flex flex-col gap-2 min-[400px]:flex-row">
-              <Button size="lg" className="h-12 px-8">
-                Sign Up
-              </Button>
-              <Button variant="outline" size="lg" className="h-12 px-8 bg-transparent">
-                Login
-              </Button>
-            </div>
-
-            <div className="flex flex-col space-y-3 pt-4 sm:flex-row sm:space-y-0 sm:space-x-6">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-primary rounded-full"></div>
-                <span className="text-sm font-medium">Upload files</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-primary rounded-full"></div>
-                <span className="text-sm font-medium">Manage folders</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-primary rounded-full"></div>
-                <span className="text-sm font-medium">Share with anyone</span>
-              </div>
-            </div>
+            <span className="text-sm font-medium text-gray-700">Now with AI-powered organization</span>
           </div>
 
-          <div className="flex items-center justify-center">
-            <div className="relative">
-              <Image
-                src="/placeholder.svg?height=500&width=500"
-                width="500"
-                height="500"
-                alt="PicDrive file storage interface showing organized folders and documents"
-                className="mx-auto aspect-square overflow-hidden rounded-xl object-cover shadow-2xl"
-              />
-              <div className="absolute -bottom-4 -right-4 bg-white rounded-lg shadow-lg p-4 border">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium">Syncing...</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          {/* Main heading */}
+          <h1 className="text-5xl md:text-6xl font-bold text-black mb-6 leading-tight">
+            PicDrive - Your cloud, your control.
+          </h1>
 
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 items-center justify-center opacity-60">
-          <div className="flex items-center justify-center">
-            <span className="text-sm font-medium">Trusted by 10M+ users</span>
+          {/* Subtitle */}
+          <p className="text-lg text-gray-600 mb-8 leading-relaxed max-w-xl">
+            Store, sync, and share your photos and files securely in the cloud. Access your memories and documents from
+            any device, anywhere in the world.
+          </p>
+
+          {/* Action buttons */}
+          <div className="flex gap-4 mb-12">
+            <Button onClick={handleNavigateToSignup} size="lg" className="bg-black hover:bg-gray-800 text-white px-8 py-3 rounded-lg font-medium">
+              Sign Up
+            </Button>
+            <Button
+              onClick={handleNavigateToLogin}
+              variant="outline"
+              size="lg"
+              className="border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-3 rounded-lg font-medium bg-transparent"
+            >
+              Login
+            </Button>
           </div>
-          <div className="flex items-center justify-center">
-            <span className="text-sm font-medium">99.9% uptime</span>
-          </div>
-          <div className="flex items-center justify-center">
-            <span className="text-sm font-medium">SOC 2 compliant</span>
-          </div>
-          <div className="flex items-center justify-center">
-            <span className="text-sm font-medium">24/7 support</span>
+
+          {/* Feature bullets */}
+          <div className="flex flex-wrap gap-6 text-sm font-medium text-gray-700">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-black rounded-full"></div>
+              <span>Upload files</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-black rounded-full"></div>
+              <span>Manage folders</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-black rounded-full"></div>
+              <span>Share with anyone</span>
+            </div>
           </div>
         </div>
       </div>
-    </section>
+
+      {/* Bottom trust indicators */}
+      <div className="border-t border-gray-200 bg-white px-6 py-6">
+        <div className="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-8 text-sm text-gray-600">
+          <div className="font-medium">Trusted by many users</div>
+          <div className="font-medium">99.9% uptime</div>
+          <div className="font-medium">SOC 2 compliant</div>
+          <div className="font-medium">24/7 support</div>
+        </div>
+      </div>
+
+      {/* Syncing indicator */}
+      <div className="fixed bottom-6 right-6">
+        <div className="bg-white rounded-full px-4 py-2 shadow-lg border border-gray-200 flex items-center gap-2">
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <span className="text-sm font-medium text-gray-700">Syncing...</span>
+        </div>
+      </div>
+    </div>
   )
 }

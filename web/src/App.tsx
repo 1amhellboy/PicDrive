@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Login from './pages/Login'; // make sure the path is correct
+// import Login from './pages/Login'; 
 import Signup from './pages/Signup';
 import PicDrivePage from './pages/PicDrivePage';
-// import Component from "./pages/hero";
+import Component from "./pages/hero";
+import Auth from './pages/auth';
 
 
 // import Dashboard from './pages/Dashboard';
@@ -11,10 +12,10 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* <Route path="/" element={<Dashboard />} /> */}
-        <Route path="/login" element={<Login />} />
-        <Route path='/signup' element={<Signup/>}></Route>
+        <Route path="/login" element={<Auth />} />
+        <Route path='/signup' element={<Auth/>}></Route>
         <Route path='/dashboard' element={<PicDrivePage/>}></Route>
-        {/* <Route path='/' element={<Component/>}></Route> */}
+        <Route path='/' element={<Component/>}></Route>
         {/* Later add dashboard route etc. */}
       </Routes>
     </BrowserRouter>
