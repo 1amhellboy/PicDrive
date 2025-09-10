@@ -91,6 +91,9 @@ export const Login = async (req: Request, res: Response) => {
     const refreshToken = generateRefreshToken();
 
     console.log(token);
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    console.log("Token lifetime (minutes):", (payload.exp * 1000 - Date.now()) / 60000);
+
     // console.log(refreshToken);
 
     // Store the refresh token in the database
@@ -156,12 +159,22 @@ export const refreshAcessToken = async (req:Request, res:Response) => {
 
 // Logout  
 
-export const Logout = async (req:Request,res:Response)=>{
-  try{
-    const {userId} = req.body;
+// export const Logout = async (req:Request,res:Response)=>{
+//   try{
+//     const userId = (req as any).user.id;
+//     await logoutUser(userId);
+//     res.status(200).json({message:"Logged out successfully"});
+//   }catch(err:any){
+//     res.status(500).json({error:err.message});
+//   }
+// }
+
+export const Logout = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.id; // from JWT middleware
     await logoutUser(userId);
-    res.status(200).json({message:"Logged out successfully"});
-  }catch(err:any){
-    res.status(500).json({error:err.message});
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
-}
+};

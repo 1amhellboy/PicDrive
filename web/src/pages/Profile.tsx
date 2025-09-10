@@ -1,15 +1,19 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { use, useState } from "react"
 import { User, Mail, Calendar, Edit3, Camera } from "lucide-react"
+import { useAuth } from "@/context/AuthContext"
+import {Button} from "@/components/ui/button1"
 
 const Profile: React.FC = () => {
+  const { user, logout } = useAuth();
+  const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false)
   const [profile, setProfile] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    joinDate: "January 2023",
+    name: user?.name || "John Doe",
+    email: user?.email || "abc@gmail.com",
+    joinDate: user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "January 1, 2023",
     avatar: "/placeholder.svg?height=120&width=120",
   })
 
@@ -17,6 +21,14 @@ const Profile: React.FC = () => {
     name: profile.name,
     email: profile.email,
   })
+
+  const handleLogout = async()=>{
+    try{
+      await logout();
+    }catch(err){
+      console.error("Logout failed:", err);
+    }
+  }
 
   const handleSave = () => {
     setProfile((prev) => ({
@@ -132,6 +144,14 @@ const Profile: React.FC = () => {
               </div>
             )}
           </div>
+          <form onSubmit={handleLogout}>
+          <div className="mt-6">
+                <Button type="submit" disabled={loading} className="w-fit h-fit bg-gray-900 hover:bg-gray-800 text-white font-medium disabled:opacity-50">
+                  {loading ? "Logging out..." : "Logout"}
+                </Button>
+          </div>
+          </form>
+
         </div>
 
         {/* Account Statistics */}

@@ -213,6 +213,7 @@ interface User {
   id: string;
   name: string;
   email: string;
+  createdAt: string;
 }
 interface AuthContextType {
   user: User | null;
@@ -237,37 +238,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [refreshToken, setRefreshToken] = useState<string | null>(localStorage.getItem("refreshToken"));
   const [loading, setLoading] = useState(true);
 
-  const isAuthenticated = !!accessToken && !!user;
+  // Restore user on reload
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) setUser(JSON.parse(storedUser));
+    setLoading(false);
+  }, []);
+
+  const isAuthenticated = !!accessToken;
 
   // ---------- Validate token on load ----------
-  useEffect(() => {
-    const validateToken = async () => {
-      const storedToken = localStorage.getItem("accessToken");
-      if (!storedToken) {
-        setUser(null);
-        setAccessToken(null);
-        setLoading(false);
-        return;
-      }
-      try {
-        // Call a backend endpoint to validate token and get user info.
-        const res = await fetch("/api/me", {
-          headers: { Authorization: `Bearer ${storedToken}` },
-        });
-        if (!res.ok) throw new Error("Invalid token");
-        const userData = await res.json();
-        setUser(userData);
-        setAccessToken(storedToken);
-      } catch {
-        setUser(null);
-        setAccessToken(null);
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("user");
-      }
-      setLoading(false);
-    };
-    validateToken();
-  }, []);
+  // useEffect(() => {
+  //   const validateToken = async () => {
+  //     const storedToken = localStorage.getItem("accessToken");
+  //     if (!storedToken) {
+  //       setUser(null);
+  //       setAccessToken(null);
+  //       setLoading(false);
+  //       return;
+  //     }
+  //     try {
+  //       // Call a backend endpoint to validate token and get user info.
+  //       const res = await fetch("/api/me", {
+  //         headers: { Authorization: `Bearer ${storedToken}` },
+  //       });
+  //       if (!res.ok) throw new Error("Invalid token");
+  //       const userData = await res.json();
+  //       setUser(userData);
+  //       setAccessToken(storedToken);
+  //     } catch {
+  //       setUser(null);
+  //       setAccessToken(null);
+  //       localStorage.removeItem("accessToken");
+  //       localStorage.removeItem("user");
+  //     }
+  //     setLoading(false);
+  //   };
+  //   validateToken();
+  // }, []);
+
 
   // ---------- Login ----------
   const login = async (email: string, password: string) => {
@@ -287,17 +296,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // ---------- Logout ----------
-  const logout = async () => {
-    if (!refreshToken) return;
-    await logoutUser(refreshToken);
+  // const logout = async () => {
+  //   const user = localStorage.getItem("user");
+  //   const accessToken = localStorage.getItem("accessToken");
+
+  //   // if (!refreshToken) return;
+  //   if (!user || !accessToken) return; 
+
+  //   const {id} = JSON.parse(user) || {};
+  //   if (!id) return;
+
+  //   await logoutUser(id,accessToken);
+
+  //   setUser(null);
+  //   setAccessToken(null);
+  //   setRefreshToken(null);
+  //   localStorage.removeItem("accessToken");
+  //   localStorage.removeItem("refreshToken");
+  //   localStorage.removeItem("user");
+  // };
+
+const logout = async () => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  if (!accessToken) return;
+
+  try {
+    await logoutUser(accessToken);
+  } catch (err) {
+    console.error("Logout failed:", err);
+  } finally {
     setUser(null);
     setAccessToken(null);
     setRefreshToken(null);
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("user");
-  };
-
+  }
+};
   // ---------- Password Reset ----------
   const requestReset = async (email: string) => {
     await requestPasswordReset(email);

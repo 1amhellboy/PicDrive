@@ -288,11 +288,36 @@ export const loginUser = async (email: string, password: string) => {
 };
 
 // Logout user (invalidates backend refresh token)
-export const logoutUser = async (refreshToken: string) => {
+// export const logoutUser = async (userId: string | null, accessToken: string | null) => {
+  
+//   const res = await fetch(`${API_BASE}/auth/logout`, {
+//     method: "POST",
+//     headers: { 
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${accessToken}`,
+//      },
+//     body: JSON.stringify({ userId }),
+//   });
+
+//   const data = await res.json();
+
+//   if (!res.ok) {
+//     throw new Error(data.error || data.message || "Logout failed");
+//   }
+
+//   return data; // { message }
+// };
+
+// Logout user (invalidate refresh token)
+export const logoutUser = async (accessToken: string | null) => {
+  if (!accessToken) throw new Error("No access token found");
+
   const res = await fetch(`${API_BASE}/auth/logout`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refreshToken }),
+    headers: { 
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
 
   const data = await res.json();
@@ -301,8 +326,9 @@ export const logoutUser = async (refreshToken: string) => {
     throw new Error(data.error || data.message || "Logout failed");
   }
 
-  return data; // { message }
+  return data; // { message: "Logged out successfully" }
 };
+
 
 // ----------------- PASSWORD RESET -----------------
 
