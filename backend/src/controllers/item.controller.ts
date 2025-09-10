@@ -30,20 +30,44 @@ export const create = async (req: Request, res: Response): Promise<void> => {
 };
 
 // Read (get items by parent)
+// export const getByParent = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const { parentId } = req.params;
+//     const userId = req.user?.id;
+
+//     if (!userId) {
+//       res.status(401).json({ message: 'Unauthorized: userId missing' });
+//       return;
+//     }
+
+//     const items = await getItemsByParent(parentId === 'root' ? null : parentId, userId);
+//     res.status(200).json(items);
+//   } catch (err: any) {
+//     res.status(500).json({ message: err.message || 'Failed to fetch items' });
+//   }
+// };
 export const getByParent = async (req: Request, res: Response): Promise<void> => {
   try {
     const { parentId } = req.params;
     const userId = req.user?.id;
 
     if (!userId) {
-      res.status(401).json({ message: 'Unauthorized: userId missing' });
+      res.status(401).json({ message: "Unauthorized: userId missing" });
       return;
     }
 
-    const items = await getItemsByParent(parentId === 'root' ? null : parentId, userId);
+    // Normalize parentId
+    let normalizedParentId: string | null;
+    if (parentId === "null" || parentId === "root") {
+      normalizedParentId = null;
+    } else {
+      normalizedParentId = parentId;
+    }
+
+    const items = await getItemsByParent(normalizedParentId, userId);
     res.status(200).json(items);
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to fetch items' });
+    res.status(500).json({ message: err.message || "Failed to fetch items" });
   }
 };
 

@@ -8,6 +8,16 @@ import { upload } from '../middlewares/upload.middleware';
 const router = express.Router();
 
 router.post('/', authenticate,validate(CreateItemSchema), create);
+// router.get('/', authenticate, async (req, res) => {
+//   try {
+//     // inject parentId = null and forward to controller
+//     req.params.parentId = null as any;
+//     await getByParent(req, res);
+//   } catch (err: any) {
+//     res.status(500).json({ error: err.message || "Failed to fetch root items" });
+//   }
+// });
+
 router.get('/:parentId', authenticate,validate(GetItemsSchema), getByParent);
 router.patch('/:id', authenticate,validate(RenameItemSchema), rename);
 router.delete('/:id', authenticate, remove);

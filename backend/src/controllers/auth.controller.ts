@@ -90,7 +90,7 @@ export const Login = async (req: Request, res: Response) => {
     const token = generateToken(user.id);
     const refreshToken = generateRefreshToken();
 
-    console.log(token);
+    console.log("accessToken",token);
     const payload = JSON.parse(atob(token.split(".")[1]));
     console.log("Token lifetime (minutes):", (payload.exp * 1000 - Date.now()) / 60000);
 

@@ -30,6 +30,6 @@ export const ShareItemSchema = z.object({
 });
 
 export const GetItemsSchema = z.object({
-  parentId: z.string().uuid().nullable(),
-  userId: z.string().uuid()
+ parentId: z.string().uuid().or(z.literal("null")).or(z.literal("root")),
+  // userId: z.string().uuid()
 });

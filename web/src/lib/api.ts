@@ -250,6 +250,38 @@
 // Base URL for backend API
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
+// src/services/api.ts
+
+export const api = {
+  get: async (url: string) => {
+    const token = localStorage.getItem("accessToken");
+    const res = await fetch(`${API_BASE}${url}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token ? `Bearer ${token}` : "",
+      },
+    });
+    if (!res.ok) throw new Error((await res.json()).message || "API error");
+    return res;
+  },
+
+  post: async (url: string, body: any) => {
+    const token = localStorage.getItem("accessToken");
+    const res = await fetch(`${API_BASE}${url}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token ? `Bearer ${token}` : "",
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error((await res.json()).message || "API error");
+    return res;
+  },
+};
+
+
 // ----------------- AUTH -----------------
 
 // Register a user
