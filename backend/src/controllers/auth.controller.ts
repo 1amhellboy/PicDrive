@@ -73,7 +73,8 @@ export const SignUp = async (req: Request, res: Response, next: NextFunction) =>
     const { email, password, name } = req.body;
     const user = await registerUser(email, password, name);
     const token = generateToken(user.id);
-    res.status(201).json({ user, token });
+    const refreshToken = generateRefreshToken();
+    res.status(201).json({ user, token, refreshToken});
   } catch (err) {
     next(err);
   }

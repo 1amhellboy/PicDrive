@@ -1,4 +1,4 @@
-import {createItem, deleteItem, getItemsByParent, renameItem, createShare, getShared, handleFileUpload, moveToTrash, getTrashedItems, restoreItem} from '../services/item.service';
+import {createItem, deleteItem, getItemsByParent, renameItem, createShare, getShared, handleFileUpload, moveToTrash, getTrashedItems, restoreItem, emptyTrash} from '../services/item.service';
 import {Request, Response} from 'express';
 import { deleteFileFromS3 } from '../utils/s3';
 import { userInfo } from 'os';
@@ -336,3 +336,18 @@ export const restore = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+
+export const clearTrash = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const result = await emptyTrash(userId);
+    res.status(200).json(result);
+  } catch (err: any) {
+    res.status(500).json({ message: err.message || "Failed to empty trash" });
+  }
+};

@@ -285,7 +285,8 @@ export const api = {
 // ----------------- AUTH -----------------
 
 // Register a user
-export const registerUser = async (email: string, password: string, name: string) => {
+export const registerUser = async (name: string, email: string, password: string) => {
+  console.log("➡️ Sending signup payload:", { name, email, password });
   const res = await fetch(`${API_BASE}/auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -295,6 +296,8 @@ export const registerUser = async (email: string, password: string, name: string
   const data = await res.json();
 
   if (!res.ok) {
+    // throw new Error(data.error || data.message || "Registration failed");
+    console.error("❌ Signup response (backend):", data);
     throw new Error(data.error || data.message || "Registration failed");
   }
 

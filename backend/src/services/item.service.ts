@@ -308,3 +308,69 @@ export const restoreItem = async (itemId: string, userId: string) => {
   }
 };
 
+
+// export const emptyTrash = async (userId: string) => {
+//   try {
+//     // 1. Find all trashed items for the user
+//     const trashedItems = await prisma.item.findMany({
+//       where: { userId, isTrashed: true },
+//     });
+
+//     // 2. Delete S3 files (only for files, not folders)
+//     for (const item of trashedItems) {
+//       if (item.type === "file" && item.url) {
+//         const key = item.url.split("/").pop();
+//         if (key) {
+//           try {
+//             await deleteFileFromS3(key);
+//           } catch (s3Err) {
+//             console.error(`S3 deletion failed for ${item.id}:`, s3Err);
+//           }
+//         }
+//       }
+//     }
+
+//     // 3. Remove from DB
+//     await prisma.item.deleteMany({
+//       where: { userId, isTrashed: true },
+//     });
+
+//     return { message: "Trash emptied successfully" };
+//   } catch (err) {
+//     console.error("Error emptying trash:", err);
+//     throw new Error("Failed to empty trash");
+//   }
+// };
+
+export const emptyTrash = async (userId: string) => {
+  try {
+    // 1. Find trashed items
+    const trashedItems = await prisma.item.findMany({
+      where: { userId, isTrashed: true }, // adjust condition to your schema
+    });
+
+    const trashedItemIds = trashedItems.map(item => item.id);
+
+    if (trashedItemIds.length === 0) return { message: "Trash is already empty" };
+
+    // 2. Delete dependent records first
+    await prisma.activityLog.deleteMany({
+      where: { itemId: { in: trashedItemIds } },
+    });
+
+    await prisma.share.deleteMany({
+      where: { itemId: { in: trashedItemIds } },
+    });
+
+    // 3. Delete items
+    await prisma.item.deleteMany({
+      where: { id: { in: trashedItemIds } },
+    });
+
+    return { message: "Trash emptied successfully" };
+  } catch (error) {
+    console.error("Error emptying trash:", error);
+    throw new Error("Failed to empty trash");
+  }
+};
+

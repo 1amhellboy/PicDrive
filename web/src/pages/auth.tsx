@@ -572,7 +572,7 @@ function Auth() {
     setLoading(true);
 
     try {
-      await register(signupData.email, signupData.password, signupData.name);
+      await register(signupData.name, signupData.email, signupData.password);
       // optional: auto-login is already handled by context `register`
       navigate(from, { replace: true });
     } catch (err: any) {

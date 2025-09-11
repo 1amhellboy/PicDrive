@@ -291,7 +291,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // ---------- Register ----------
   const register = async (name: string, email: string, password: string) => {
-    await registerUser(email, password, name);
+    await registerUser( name, email, password);
     await login(email, password);
   };
 

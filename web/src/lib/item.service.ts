@@ -252,3 +252,19 @@ export const deleteForever = async (id: string) => {
 
   return data;
 };
+
+
+export const emptyTrash = async () => {
+  const token = getToken();
+  const res = await fetch(`${API_BASE}/items/trash/empty`, {
+    method: "DELETE",
+    headers: {
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || data.message || "Failed to empty trash");
+
+  return data;
+};
