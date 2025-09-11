@@ -33,6 +33,25 @@ export const createItem = async (
   }
 };
 
+export const createFolder = async (
+  name: string,
+  userId: string,
+  parentId: string | null
+) => {
+  try {
+    return await prisma.item.create({
+      data: {
+        name,
+        type: "folder",
+        userId,
+        parentId,
+      },
+    });
+  } catch (error) {
+    console.error("Error creating folder:", error);
+    throw new Error("Failed to create folder");
+  }
+}
 
 // Get items by parent ID and user ID
 

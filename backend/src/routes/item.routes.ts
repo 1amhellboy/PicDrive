@@ -1,5 +1,5 @@
 import express from "express";
-import { create, getByParent, rename, remove, shareItem, accessSharedItem, uploadFile, trashItem, getTrash, restore, clearTrash } from '../controllers/item.controller';
+import { create, getByParent, rename, remove, shareItem, accessSharedItem, uploadFile, trashItem, getTrash, restore, clearTrash,uploadFolder } from '../controllers/item.controller';
 import { authenticate } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate";
 import { CreateItemSchema,RenameItemSchema,DeleteItemSchema,ShareItemSchema,GetItemsSchema } from "../validators/item.schema";
@@ -18,6 +18,8 @@ router.delete('/:id', authenticate, remove);
 router.post("/share",authenticate,validate(ShareItemSchema),shareItem);
 router.get('/share/:id',authenticate,validate(DeleteItemSchema),accessSharedItem); 
 router.post('/upload', authenticate, upload.single('file'), uploadFile);
+router.post("/upload-folder",authenticate,upload.array("files"),uploadFolder);  // multiple files (with relative paths)uploadFolder
+
 
 
 export  default router;

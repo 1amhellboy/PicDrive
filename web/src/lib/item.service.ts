@@ -268,3 +268,53 @@ export const emptyTrash = async () => {
 
   return data;
 };
+
+
+// UPLOAD FOLDER
+
+//  Uploads a folder (with nested files) to the backend.
+//  Uses `webkitdirectory` from <input> to preserve folder structure.
+
+// export const uploadFolder = async (files: FileList, parentId?: string | null) => {
+//   const token = getToken();
+//   const formData = new FormData();
+
+//   // append all files with their relative paths
+//   Array.from(files).forEach((file) => {
+//     // preserve folder hierarchy for backend
+//     formData.append("files", file, (file as any).webkitRelativePath || file.name);
+//   });
+
+//   if (parentId) formData.append("parentId", parentId);
+
+//   const res = await fetch(`${API_BASE}/items/upload-folder`, {
+//     method: "POST",
+//     headers: {
+//       Authorization: token ? `Bearer ${token}` : "",
+//     },
+//     body: formData,
+//   });
+
+//   const data = await res.json();
+//   if (!res.ok) throw new Error(data.error || data.message || "Folder upload failed");
+
+//   return data;
+// };
+
+// item.service.ts
+export const uploadFolder = async (formData: FormData) => {
+  const token = getToken();
+
+  const res = await fetch(`${API_BASE}/items/upload-folder`, {
+    method: "POST",
+    headers: {
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+    body: formData,
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || data.message || "Folder upload failed");
+
+  return data;
+};

@@ -199,9 +199,10 @@ interface FolderCardProps {
   onClick?: () => void
   viewMode?: "grid" | "list"
   onTrashed?: () => void; //
+  onOpen?: (folderName: string) => void
 }
 
-const FolderCard: React.FC<FolderCardProps> = ({id, name, itemCount, modifiedDate, onClick, onTrashed, viewMode = "grid" }) => {
+const FolderCard: React.FC<FolderCardProps> = ({id, name, itemCount, modifiedDate, onClick, onTrashed, viewMode = "grid",onOpen }) => {
   const [showMenu, setShowMenu] = useState(false)
   const [showRenameModal, setShowRenameModal] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
@@ -235,7 +236,12 @@ const FolderCard: React.FC<FolderCardProps> = ({id, name, itemCount, modifiedDat
       case "share":
         setShowShareModal(true)
         break
+      // case "open":
       case "open":
+        if (onOpen) {
+          onOpen(folderName)
+          }
+      break
       case "download":
       case "delete":
         try {

@@ -246,7 +246,7 @@ import { useState, useEffect, useRef } from "react"
 import RenameModal from "../components/RenamModel"
 import ShareModal from "../components/ShareModel"
 import { moveToTrash } from "../lib/item.service";
-
+import FilePreview from "../components/FilePreview";
 
 interface FileCardProps {
   id:string
@@ -276,6 +276,8 @@ const FileCard: React.FC<FileCardProps> = ({
   const [showShareModal, setShowShareModal] = useState(false)
   const [fileName, setFileName] = useState(name)
   const menuRef = useRef<HTMLDivElement>(null)
+  const [showFilePreview, setShowFilePreview] = useState(false)
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -327,6 +329,8 @@ const FileCard: React.FC<FileCardProps> = ({
         setShowShareModal(true)
         break
       case "open":
+        setShowFilePreview(true)
+        break
       case "download":
       case "delete":
       try {
@@ -501,6 +505,13 @@ const FileCard: React.FC<FileCardProps> = ({
         onClose={() => setShowShareModal(false)}
         fileName={fileName}
         fileType="file"
+      />
+         
+      <FilePreview
+        isOpen={showFilePreview}
+        onClose={() => setShowFilePreview(false)}
+        fileName={fileName}
+        fileType={type}
       />
     </>
   )
