@@ -108,45 +108,64 @@ export const rename = async (req: Request, res: Response): Promise<void> => {
 //   }
 // };
 
+// export const remove = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const { id } = req.params;
+//     const userId = req.user?.id;
+
+//     if (!userId) {
+//       res.status(401).json({ message: 'Unauthorized: userId missing' });
+//       return;
+//     }
+
+//     // 1. Find the item in DB to get its S3 key
+//     const item = await prisma.item.findUnique({
+//       where: { id },
+//     });
+
+//     if (!item || item.userId !== userId) {
+//       res.status(404).json({ message: 'Item not found or unauthorized' });
+//       return;
+//     }
+
+//     // 2. Delete from DB
+//     await deleteItem(id, userId);
+
+//     // 3. If it's a file, delete from S3
+//     if (item.type === 'file' && item.url) {
+//       try {
+//         const key = item.url.split('/').pop(); // extract the key from the URL
+//         if (key) await deleteFileFromS3(key);
+//       } catch (s3Error) {
+//         console.error("S3 deletion failed:", s3Error);
+//         // Not throwing here because DB deletion was successful
+//       }
+//     }
+
+//     res.status(200).json({ message: 'Item deleted successfully' });
+//   } catch (err: any) {
+//     res.status(500).json({ message: err.message || 'Failed to delete item' });
+//   }
+// };
+
 export const remove = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const userId = req.user?.id;
 
     if (!userId) {
-      res.status(401).json({ message: 'Unauthorized: userId missing' });
+      res.status(401).json({ message: "Unauthorized: userId missing" });
       return;
     }
 
-    // 1. Find the item in DB to get its S3 key
-    const item = await prisma.item.findUnique({
-      where: { id },
-    });
-
-    if (!item || item.userId !== userId) {
-      res.status(404).json({ message: 'Item not found or unauthorized' });
-      return;
-    }
-
-    // 2. Delete from DB
     await deleteItem(id, userId);
 
-    // 3. If it's a file, delete from S3
-    if (item.type === 'file' && item.url) {
-      try {
-        const key = item.url.split('/').pop(); // extract the key from the URL
-        if (key) await deleteFileFromS3(key);
-      } catch (s3Error) {
-        console.error("S3 deletion failed:", s3Error);
-        // Not throwing here because DB deletion was successful
-      }
-    }
-
-    res.status(200).json({ message: 'Item deleted successfully' });
+    res.status(200).json({ message: "Item deleted successfully" });
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to delete item' });
+    res.status(500).json({ message: err.message || "Failed to delete item" });
   }
 };
+
 
 // Share 
 

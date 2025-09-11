@@ -109,29 +109,73 @@ export const renameItem = async (itemId: string, name: string, userId: string) =
 //   }
 // };
 
+// export const deleteItem = async (itemId: string, userId: string) => {
+//   try {
+//     await prisma.activityLog.deleteMany({
+//       where: { itemId }
+//     });
+
+//     const result = await prisma.item.deleteMany({
+//       where: {
+//         id: itemId,
+//         userId,
+//       },
+//     });
+
+//     if (result.count === 0) {
+//       throw new Error('Item not found or unauthorized');
+//     }
+
+//     return result;
+//   } catch (error) {
+//     console.error('Error deleting item:', error);
+//     throw new Error('Failed to delete item');
+//   }
+// };
+
 export const deleteItem = async (itemId: string, userId: string) => {
   try {
-    await prisma.activityLog.deleteMany({
-      where: { itemId }
+    // 1. Find item (we need the URL before deleting)
+    const item = await prisma.item.findUnique({
+      where: { id: itemId },
     });
 
+    if (!item || item.userId !== userId) {
+      throw new Error("Item not found or unauthorized");
+    }
+
+    // 2. Delete activity logs linked to this item
+    await prisma.activityLog.deleteMany({ where: { itemId } });
+
+    // 3. Delete item from DB
     const result = await prisma.item.deleteMany({
-      where: {
-        id: itemId,
-        userId,
-      },
+      where: { id: itemId, userId },
     });
 
     if (result.count === 0) {
-      throw new Error('Item not found or unauthorized');
+      throw new Error("Item not found or unauthorized");
+    }
+
+    // 4. If it's a file, delete from S3
+    if (item.type === "file" && item.url) {
+      try {
+        const key = item.url.split("/").pop(); // extract key from URL
+        if (key) {
+          await deleteFileFromS3(key);
+        }
+      } catch (s3Error) {
+        console.error("S3 deletion failed:", s3Error);
+        // Don’t throw — DB deletion was already successful
+      }
     }
 
     return result;
   } catch (error) {
-    console.error('Error deleting item:', error);
-    throw new Error('Failed to delete item');
+    console.error("Error deleting item:", error);
+    throw new Error("Failed to delete item");
   }
 };
+
 
 
 
