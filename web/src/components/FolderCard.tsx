@@ -188,16 +188,20 @@ import { Folder, MoreVertical, FolderOpen, Share, Download, Edit3, Trash2 } from
 import { useState, useEffect, useRef } from "react"
 import RenameModal from "../components/RenamModel"
 import ShareModal from "../components/ShareModel"
+import { moveToTrash } from "../lib/item.service"; // adjust path if needed
+
 
 interface FolderCardProps {
+  id:string
   name: string
   itemCount: number
   modifiedDate: string
   onClick?: () => void
   viewMode?: "grid" | "list"
+  onTrashed?: () => void; //
 }
 
-const FolderCard: React.FC<FolderCardProps> = ({ name, itemCount, modifiedDate, onClick, viewMode = "grid" }) => {
+const FolderCard: React.FC<FolderCardProps> = ({id, name, itemCount, modifiedDate, onClick, onTrashed, viewMode = "grid" }) => {
   const [showMenu, setShowMenu] = useState(false)
   const [showRenameModal, setShowRenameModal] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
@@ -220,7 +224,7 @@ const FolderCard: React.FC<FolderCardProps> = ({ name, itemCount, modifiedDate, 
     }
   }, [showMenu])
 
-  const handleMenuClick = (e: React.MouseEvent, action: string) => {
+  const handleMenuClick = async(e: React.MouseEvent, action: string) => {
     e.stopPropagation()
     setShowMenu(false)
 
@@ -234,9 +238,18 @@ const FolderCard: React.FC<FolderCardProps> = ({ name, itemCount, modifiedDate, 
       case "open":
       case "download":
       case "delete":
-        console.log(`${action}: ${folderName}`)
-        break
-    }
+        try {
+        await moveToTrash(id);
+        console.log(`Moved folder "${folderName}" to trash`);
+        if (onTrashed) onTrashed(); // ✅ trigger refresh in MyDrive
+      } catch (err: any) {
+        alert(err.message || "Failed to move to trash");
+      }
+      break;
+      default:
+        console.log(`${action}: ${folderName}`);
+      break;
+      }
   }
 
   const handleRename = (newName: string) => {

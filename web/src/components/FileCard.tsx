@@ -245,8 +245,11 @@ import {
 import { useState, useEffect, useRef } from "react"
 import RenameModal from "../components/RenamModel"
 import ShareModal from "../components/ShareModel"
+import { moveToTrash } from "../lib/item.service";
+
 
 interface FileCardProps {
+  id:string
   name: string
   type: "image" | "video" | "audio" | "document" | "archive" | "other" | "spreadsheet" | "presentation"
   size: string
@@ -254,15 +257,18 @@ interface FileCardProps {
   thumbnail?: string
   onClick?: () => void
   viewMode?: "grid" | "list"
+  onTrashed?: () => void;
 }
 
 const FileCard: React.FC<FileCardProps> = ({
+  id,
   name,
   type,
   size,
   modifiedDate,
   thumbnail,
   onClick,
+  onTrashed,
   viewMode = "grid",
 }) => {
   const [showMenu, setShowMenu] = useState(false)
@@ -309,7 +315,7 @@ const FileCard: React.FC<FileCardProps> = ({
     }
   }
 
-  const handleMenuClick = (e: React.MouseEvent, action: string) => {
+  const handleMenuClick = async(e: React.MouseEvent, action: string) => {
     e.stopPropagation()
     setShowMenu(false)
 
@@ -323,8 +329,17 @@ const FileCard: React.FC<FileCardProps> = ({
       case "open":
       case "download":
       case "delete":
-        console.log(`${action}: ${fileName}`)
-        break
+      try {
+        await moveToTrash(id);
+        console.log(`Moved file "${fileName}" to trash`);
+        if (onTrashed) onTrashed(); //  remove from UI
+      } catch (err: any) {
+        alert(err.message || "Failed to move to trash");
+      }
+      break;
+      default:
+      console.log(`${action}: ${fileName}`);
+      break;
     }
   }
 

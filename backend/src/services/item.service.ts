@@ -42,6 +42,7 @@ export const getItemsByParent = async (parentId: string | null, userId: string) 
       where: {
         parentId,
         userId,
+        isTrashed: false,
       },
       orderBy: {
         createdAt: 'asc',
@@ -226,4 +227,84 @@ export const handleFileUpload = async (file: Express.Multer.File) => {
 };
 
 
+// item.service.ts
+export const moveToTrash = async (itemId: string, userId: string) => {
+  try {
+    const item = await prisma.item.updateMany({
+      where: { id: itemId, userId },
+      data: { isTrashed: true },
+    });
+
+    if (item.count === 0) {
+      throw new Error("Item not found or unauthorized");
+    }
+
+    await prisma.activityLog.create({
+      data: {
+        userId,
+        itemId,
+        action: "move",
+        details: "Moved to trash",
+      },
+    });
+
+    return item;
+  } catch (error) {
+    console.error("Error moving item to trash:", error);
+    throw new Error("Failed to move item to trash");
+  }
+};
+
+
+// Get all trashed items for a user
+export const getTrashedItems = async (userId: string) => {
+  try {
+    return await prisma.item.findMany({
+      where: {
+        userId,
+        isTrashed: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching trashed items:", error);
+    throw new Error("Failed to fetch trashed items");
+  }
+};
+
+
+
+// Restore an item (move back from trash)
+export const restoreItem = async (itemId: string, userId: string) => {
+  try {
+    const result = await prisma.item.updateMany({
+      where: {
+        id: itemId,
+        userId,
+        isTrashed: true,   // ✅ only trashed items can be restored
+      },
+      data: { isTrashed: false },
+    });
+
+    if (result.count === 0) {
+      throw new Error("Item not found or unauthorized");
+    }
+
+    await prisma.activityLog.create({
+      data: {
+        userId,
+        itemId,
+        action: "move",   // ✅ reuse move action
+        details: "restored from trash",
+      },
+    });
+
+    return result;
+  } catch (error) {
+    console.error("Error restoring item:", error);
+    throw new Error("Failed to restore item");
+  }
+};
 

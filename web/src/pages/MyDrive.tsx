@@ -170,6 +170,7 @@ const MyDrive: React.FC<MyDriveProps> = ({ viewMode }) => {
             {folders.map((folder) => (
               <FolderCard
                 key={folder.id}
+                id={folder.id}
                 name={folder.name}
                 itemCount={0} // TODO: count children if needed
                 // modifiedDate={new Date(folder.updatedAt).toLocaleDateString()}
@@ -184,6 +185,7 @@ const MyDrive: React.FC<MyDriveProps> = ({ viewMode }) => {
                 // }
                 modifiedDate={formatRelativeDate(folder.createdAt)}
                 viewMode="list"
+                onTrashed={() => setItems((prev) => prev.filter((i) => i.id !== folder.id))}
                 onClick={() => console.log(`Open folder: ${folder.name}`)}
               />
             ))}
@@ -191,6 +193,7 @@ const MyDrive: React.FC<MyDriveProps> = ({ viewMode }) => {
               <FileCard
                 key={file.id}
                 name={file.name}
+                id={file.id}
                 type="file"
                 size={file.size ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : "—"}
                 // modifiedDate={new Date(file.updatedAt).toLocaleDateString()}
@@ -203,6 +206,7 @@ const MyDrive: React.FC<MyDriveProps> = ({ viewMode }) => {
                 //     })
                 //   : "No Date"
                 // }
+                onTrashed={() => setItems((prev) => prev.filter((i) => i.id !== file.id))}
                 modifiedDate={formatRelativeDate(file.createdAt)}
                 viewMode="list"
                 onClick={() => console.log(`Open file: ${file.name}`)}
@@ -215,6 +219,7 @@ const MyDrive: React.FC<MyDriveProps> = ({ viewMode }) => {
           {folders.map((folder) => (
             <FolderCard
               key={folder.id}
+              id={folder.id}
               name={folder.name}
               itemCount={0}
               // modifiedDate={new Date(folder.updatedAt).toLocaleDateString()}
@@ -229,14 +234,17 @@ const MyDrive: React.FC<MyDriveProps> = ({ viewMode }) => {
               // }
               modifiedDate={formatRelativeDate(folder.createdAt)}
               viewMode="grid"
+              onTrashed={() => setItems((prev) => prev.filter((i) => i.id !== folder.id))}
               onClick={() => console.log(`Open folder: ${folder.name}`)}
             />
           ))}
           {files.map((file) => (
             <FileCard
               key={file.id}
+              id={file.id}
               name={file.name}
               type="file"
+              // type="document" // or map your file.mimeType -> type
               size={file.size ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : "—"}
               // modifiedDate={new Date(file.updatedAt).toLocaleDateString()}
               // modifiedDate={
@@ -251,6 +259,7 @@ const MyDrive: React.FC<MyDriveProps> = ({ viewMode }) => {
               modifiedDate={formatRelativeDate(file.createdAt)}
               viewMode="grid"
               onClick={() => console.log(`Open file: ${file.name}`)}
+              onTrashed={() => setItems((prev) => prev.filter((i) => i.id !== file.id))}
             />
           ))}
         </div>

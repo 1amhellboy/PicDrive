@@ -168,3 +168,87 @@ export const shareItem = async (payload: SharePayload) => {
 
   return data;
 };
+
+
+// Move item to trash
+export const moveToTrash = async (id: string) => {
+  const token = getToken();
+  const res = await fetch(`${API_BASE}/items/${id}/trash`, {
+    method: "PATCH",
+    headers: {
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || data.message || "Failed to move item to trash");
+
+  return data;
+};
+
+// // Restore item from trash
+// export const restoreItem = async (id: string) => {
+//   const token = getToken();
+//   const res = await fetch(`${API_BASE}/items/${id}/restore`, {
+//     method: "PATCH",
+//     headers: {
+//       Authorization: token ? `Bearer ${token}` : "",
+//     },
+//   });
+
+//   const data = await res.json();
+//   if (!res.ok) throw new Error(data.error || data.message || "Failed to restore item");
+
+//   return data;
+// };
+
+
+// Get trashed items
+export const getTrashedItems = async (): Promise<Item[]> => {
+  const token = localStorage.getItem("accessToken");
+  const res = await fetch(`${API_BASE}/items/trash`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || data.message || "Failed to fetch trashed items");
+
+  return data;
+};
+
+// Restore item
+export const restoreItem = async (id: string) => {
+  const token = getToken();
+  const res = await fetch(`${API_BASE}/items/${id}/restore`, {
+    method: "PATCH",
+    headers: {
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || data.message || "Failed to restore item");
+
+  return data;
+};
+
+
+// Delete forever
+export const deleteForever = async (id: string) => {
+  const token = localStorage.getItem("accessToken");
+  const res = await fetch(`${API_BASE}/items/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || data.message || "Failed to delete item");
+
+  return data;
+};

@@ -1,4 +1,4 @@
-import {createItem, deleteItem, getItemsByParent, renameItem, createShare, getShared, handleFileUpload} from '../services/item.service';
+import {createItem, deleteItem, getItemsByParent, renameItem, createShare, getShared, handleFileUpload, moveToTrash, getTrashedItems, restoreItem} from '../services/item.service';
 import {Request, Response} from 'express';
 import { deleteFileFromS3 } from '../utils/s3';
 import { userInfo } from 'os';
@@ -277,3 +277,62 @@ export const uploadFile = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Upload failed, rolled back" });
   }
 };
+
+// item.controller.ts
+export const trashItem = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    await moveToTrash(id, userId);
+
+    res.status(200).json({ message: "Item moved to trash" });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message || "Failed to move item to trash" });
+  }
+};
+
+// Get all trashed items
+export const getTrash = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const trashed = await getTrashedItems(userId);
+    res.status(200).json(trashed);
+  } catch (err: any) {
+    console.error("Error fetching trashed items:", err);
+    res
+      .status(500)
+      .json({ message: err.message || "Failed to fetch trashed items" });
+  }
+};
+
+
+
+export const restore = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const restored = await restoreItem(id, userId);
+    res.status(200).json({ message: "Item restored", restored });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message || "Failed to restore item" });
+  }
+};
+
