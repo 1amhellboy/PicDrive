@@ -251,7 +251,7 @@ import { moveToTrash } from "../lib/item.service";
 interface FileCardProps {
   id:string
   name: string
-  type: "image" | "video" | "audio" | "document" | "archive" | "other" | "spreadsheet" | "presentation"
+  type: "file" | "folder" | "image" | "video" | "audio" | "document" | "archive" | "other" | "spreadsheet" | "presentation"
   size: string
   modifiedDate: string
   thumbnail?: string
@@ -507,4 +507,5 @@ const FileCard: React.FC<FileCardProps> = ({
 }
 
 export default FileCard
+
 

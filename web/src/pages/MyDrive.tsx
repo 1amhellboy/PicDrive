@@ -123,6 +123,18 @@ const MyDrive: React.FC<MyDriveProps> = ({ viewMode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+const mapMimeToType = (mimeType?: string) => {
+  if (!mimeType) return "other" as const;
+  if (mimeType.startsWith("image/")) return "image" as const;
+  if (mimeType.startsWith("video/")) return "video" as const;
+  if (mimeType.startsWith("audio/")) return "audio" as const;
+  if (mimeType === "application/pdf" || mimeType.includes("msword")) return "document" as const;
+  if (mimeType.includes("spreadsheet") || mimeType.includes("excel")) return "spreadsheet" as const;
+  if (mimeType.includes("presentation") || mimeType.includes("powerpoint")) return "presentation" as const;
+  if (mimeType === "application/zip" || mimeType.includes("tar") || mimeType.includes("gzip")) return "archive" as const;
+  return "other" as const;
+};
+
   useEffect(() => {
     const fetchItems = async () => {
       try {
@@ -194,7 +206,8 @@ const MyDrive: React.FC<MyDriveProps> = ({ viewMode }) => {
                 key={file.id}
                 name={file.name}
                 id={file.id}
-                type="file"
+                // type="file"
+                type={mapMimeToType(file.mimeType)}
                 size={file.size ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : "—"}
                 // modifiedDate={new Date(file.updatedAt).toLocaleDateString()}
                 // modifiedDate={
@@ -243,7 +256,7 @@ const MyDrive: React.FC<MyDriveProps> = ({ viewMode }) => {
               key={file.id}
               id={file.id}
               name={file.name}
-              type="file"
+              type={mapMimeToType(file.mimeType)}
               // type="document" // or map your file.mimeType -> type
               size={file.size ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : "—"}
               // modifiedDate={new Date(file.updatedAt).toLocaleDateString()}
