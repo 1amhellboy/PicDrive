@@ -107,52 +107,6 @@ export const renameItem = async (itemId: string, name: string, userId: string) =
 };
 
 
-// Delete an item
-
-// export const deleteItem = async (itemId: string, userId: string) => {
-//   try {
-//     const result = await prisma.item.deleteMany({
-//       where: {
-//         id: itemId,
-//         userId,
-//       },
-//     });
-
-//     if (result.count === 0) {
-//       throw new Error('Item not found or unauthorized');
-//     }
-
-//     return result;
-//   } catch (error) {
-//     console.error('Error deleting item:', error);
-//     throw new Error('Failed to delete item');
-//   }
-// };
-
-// export const deleteItem = async (itemId: string, userId: string) => {
-//   try {
-//     await prisma.activityLog.deleteMany({
-//       where: { itemId }
-//     });
-
-//     const result = await prisma.item.deleteMany({
-//       where: {
-//         id: itemId,
-//         userId,
-//       },
-//     });
-
-//     if (result.count === 0) {
-//       throw new Error('Item not found or unauthorized');
-//     }
-
-//     return result;
-//   } catch (error) {
-//     console.error('Error deleting item:', error);
-//     throw new Error('Failed to delete item');
-//   }
-// };
-
 export const deleteItem = async (itemId: string, userId: string) => {
   try {
     // 1. Find item (we need the URL before deleting)
@@ -242,17 +196,6 @@ export const getShared = async(shareId:string)=>{
 
 export const handleFileUpload = async (file: Express.Multer.File) => {
   const result = await uploadFileToS3(file);
-  // await prisma.item.create({
-  //   data: {
-  //     name: file.originalname,  // ✅ keeps "resume.pdf"
-  //     mimeType: file.mimetype,  // ✅ keeps "application/pdf"
-  //     size: file.size,
-  //     url: result.url,          // full S3 URL
-  //     type: "file",
-  //     userId: "...",
-  //     parentId: null,
-  //   },
-  // });
   return result;
 };
 
@@ -339,39 +282,6 @@ export const restoreItem = async (itemId: string, userId: string) => {
 };
 
 
-// export const emptyTrash = async (userId: string) => {
-//   try {
-//     // 1. Find all trashed items for the user
-//     const trashedItems = await prisma.item.findMany({
-//       where: { userId, isTrashed: true },
-//     });
-
-//     // 2. Delete S3 files (only for files, not folders)
-//     for (const item of trashedItems) {
-//       if (item.type === "file" && item.url) {
-//         const key = item.url.split("/").pop();
-//         if (key) {
-//           try {
-//             await deleteFileFromS3(key);
-//           } catch (s3Err) {
-//             console.error(`S3 deletion failed for ${item.id}:`, s3Err);
-//           }
-//         }
-//       }
-//     }
-
-//     // 3. Remove from DB
-//     await prisma.item.deleteMany({
-//       where: { userId, isTrashed: true },
-//     });
-
-//     return { message: "Trash emptied successfully" };
-//   } catch (err) {
-//     console.error("Error emptying trash:", err);
-//     throw new Error("Failed to empty trash");
-//   }
-// };
-
 export const emptyTrash = async (userId: string) => {
   try {
     // 1. Find trashed items
@@ -403,39 +313,6 @@ export const emptyTrash = async (userId: string) => {
     throw new Error("Failed to empty trash");
   }
 };
-
-
-
-// export const generateDownloadLink = async (fileId: string) => {
-//   const file = await prisma.item.findUnique({ where: { id: fileId } });
-
-//   if (!file || file.type === "folder" || !file.url) {
-//     throw new Error("File not found or is a folder");
-//   }
-
-//   const key = getS3KeyFromUrl(file.url);
-//   const url = await getDownloadUrl(key, file.name);
-
-//   return url;
-// };
-
-// export const generateDownloadLink = async (fileId: string) => {
-//   const file = await prisma.item.findUnique({ where: { id: fileId } });
-
-//   if (!file || file.type === "folder" || !file.url) {
-//     throw new Error("File not found or is a folder");
-//   }
-
-//   const key = getS3KeyFromUrl(file.url);
-
-//   const url = await getDownloadUrl(
-//     key,
-//     file.name,         // full name with extension
-//     file.mimeType || "application/octet-stream" // fallback if not stored
-//   );
-
-//   return url;
-// };
 
 export const generateDownloadLink = async (fileId: string) => {
   const file = await prisma.item.findUnique({ where: { id: fileId } });

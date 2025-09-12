@@ -75,58 +75,11 @@ export const getByParent = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-// Update (rename)
-// export const rename = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const { id } = req.params;
-//     const { name } = req.body;
-//     const userId = req.user?.id;
-
-//     if (!userId) {
-//       res.status(401).json({ message: 'Unauthorized: userId missing' });
-//       return;
-//     }
-
-//     const updated = await renameItem(id, name, userId);
-//     res.status(200).json(updated);
-//   } catch (err: any) {
-//     res.status(500).json({ message: err.message || 'Failed to rename item' });
-//   }
-// };
-
-// export const rename = async (req: Request, res: Response): Promise<void> => {
-//   try {
-
-//     console.log("Rename request params:", req.params);
-//     console.log("Rename request body:", req.body);
-
-//     const { id } = req.params
-//     const { name } = req.body
-//     const userId = req.user?.id
-
-
-//     if (!userId) {
-//       res.status(401).json({ message: "Unauthorized: userId missing" })
-//       return
-//     }
-
-//     if (!name || typeof name !== "string" || !name.trim()) {
-//       res.status(400).json({ message: "Invalid name" })
-//       return
-//     }
-
-//     const updated = await renameItem(id, name.trim(), userId)
-//     res.status(200).json(updated)
-//   } catch (err: any) {
-//     res.status(500).json({ message: err.message || "Failed to rename item" })
-//   }
-// }
-
 
 export const rename = async (req: Request, res: Response): Promise<void> => {
   try {
-    console.log("🟢 Rename request params:", req.params);
-    console.log("🟢 Rename request body:", req.body);
+    console.log(" Rename request params:", req.params);
+    console.log(" Rename request body:", req.body);
 
     const { id } = req.params;
     const { name } = req.body;

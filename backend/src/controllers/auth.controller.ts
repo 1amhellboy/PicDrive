@@ -6,67 +6,6 @@ import { PrismaClient } from '../generated/prisma';
 import { ref } from 'process';
 const prisma = new PrismaClient();
 
-// Registers a new user and returns a token.
-
-// export const SignUp = async (req: Request, res: Response) => {
-//   try {
-//     const { email, password, name } = req.body;
-
-//     // Basic input validations before DB call
-//     if(!email || !password || !name){
-//       return res.status(400).json({error:'All fields are required'});
-//     }
-//     if (password.length < 8) {
-//       return res.status(400).json({ error: 'Password must be at least 8 characters long' });
-//     }
-
-//     const user = await registerUser(email, password, name);
-//     const token = generateToken(user.id);
-
-
-//     res.status(201).json({ user, token });
-//   } catch (err: any) {
-//     console.error('Signup error:', err);
-
-//     // Known user-facing errors
-//     if (typeof err.message === 'string') {
-//       if (
-//         err.message.includes('already in use') ||
-//         err.message.includes('must be at least')
-//       ) {
-//         return res.status(400).json({ error: err.message });
-//       }
-//     }
-
-//     // Unknown server error
-//     res.status(500).json({ error: 'Something went wrong during signup' });
-//   }
-// };
-
-// export const SignUp = async (req: Request, res: Response, next: NextFunction) => {
-//   try {
-//     const { email, password, name } = req.body;
-
-//     // Basic validations
-//     if (!email || !password || !name) {
-//       const err: any = new Error('All fields are required');
-//       err.statusCode = 400;
-//       throw err;
-//     }
-//     if (password.length < 8) {
-//       const err: any = new Error('Password must be at least 8 characters long');
-//       err.statusCode = 400;
-//       throw err;
-//     }
-
-//     const user = await registerUser(email, password, name);
-//     const token = generateToken(user.id);
-
-//     res.status(201).json({ user, token });
-//   } catch (err) {
-//     next(err); // Handled by errorHandler middleware
-//   }
-// };
 
 export const SignUp = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -157,18 +96,6 @@ export const refreshAcessToken = async (req:Request, res:Response) => {
 }
 
 
-
-// Logout  
-
-// export const Logout = async (req:Request,res:Response)=>{
-//   try{
-//     const userId = (req as any).user.id;
-//     await logoutUser(userId);
-//     res.status(200).json({message:"Logged out successfully"});
-//   }catch(err:any){
-//     res.status(500).json({error:err.message});
-//   }
-// }
 
 export const Logout = async (req: Request, res: Response) => {
   try {
