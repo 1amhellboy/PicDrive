@@ -1,4 +1,4 @@
-import {createItem, deleteItem, getItemsByParent, renameItem, createShare, getShared, handleFileUpload, moveToTrash, getTrashedItems, restoreItem, emptyTrash, createFolder, generateDownloadLink} from '../services/item.service';
+import {createItem, deleteItem, getItemsByParent, renameItem, createShare, getShared, handleFileUpload, moveToTrash, getTrashedItems, restoreItem, emptyTrash, createFolder, generateDownloadLink, getSharedWithUser} from '../services/item.service';
 import {Request, Response} from 'express';
 import { deleteFileFromS3, getSignedFileUrl } from '../utils/s3';
 import { userInfo } from 'os';
@@ -137,18 +137,40 @@ export const shareItem = async (req: Request, res: Response): Promise<void> => {
     const { itemId, sharedWith, isPublic, permission } = req.body;
     const userId = req.user?.id;
 
-    if (!userId) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
+  if (!userId) {
+    res.status(401).json({ message: "Unauthorized" });
+    return;
+  }
 
-    if (!itemId || !permission) {
-      res.status(400).json({ message: "Missing required fields" });
-      return;
-    }
+  // 🔍 Lookup recipient by email
+  let recipientUserId: string | null = null;
+  if (!isPublic && sharedWith) {
+  const recipient = await prisma.user.findUnique({ where: { email: sharedWith } });
+  if (!recipient) {
+    res.status(404).json({ message: "Recipient not found" });
+    return;
+  }
+  recipientUserId = recipient.id;
+  }
 
-    const share = await createShare(userId,itemId, sharedWith, isPublic, permission);
-    res.status(201).json({ message: 'Item shared', shareId: share.id });
+  const share = await createShare(userId, itemId, recipientUserId, isPublic, permission);
+  res.status(201).json({ message: "Item shared", shareId: share.id });
+
+    // const { itemId, sharedWith, isPublic, permission } = req.body;
+    // const userId = req.user?.id;
+
+    // if (!userId) {
+    //   res.status(401).json({ message: "Unauthorized" });
+    //   return;
+    // }
+
+    // if (!itemId || !permission) {
+    //   res.status(400).json({ message: "Missing required fields" });
+    //   return;
+    // }
+
+    // const share = await createShare(userId,itemId, sharedWith, isPublic, permission);
+    // res.status(201).json({ message: 'Item shared', shareId: share.id });
   } catch (err: any) {
     console.error("Error creating share:", err); // Helpful for debugging
     res.status(500).json({ error: err.message });
@@ -360,6 +382,31 @@ export const uploadFolder = async (req: Request, res: Response) => {
 
 
 
+// export const getFileUrl = async (req: Request, res: Response) => {
+//   try {
+//     const { id } = req.params;
+//     const userId = req.user?.id;
+
+//     const item = await prisma.item.findUnique({ where: { id } });
+
+//     if (!item || item.userId !== userId || !item.url) {
+//       return res.status(404).json({ error: "File not found" });
+//     }
+
+//     // Extract the key from the saved URL
+//     const key = item.url.split("/").pop();
+//     if (!key) {
+//       return res.status(400).json({ error: "Invalid file URL in DB" });
+//     }
+
+//     const signedUrl = await getSignedFileUrl(key);
+//     res.json({ url: signedUrl });
+//   } catch (err: any) {
+//     console.error("getFileUrl error:", err);
+//     res.status(500).json({ error: err.message || "Failed to generate signed URL" });
+//   }
+// };
+
 export const getFileUrl = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -367,8 +414,25 @@ export const getFileUrl = async (req: Request, res: Response) => {
 
     const item = await prisma.item.findUnique({ where: { id } });
 
-    if (!item || item.userId !== userId || !item.url) {
+    if (!item || !item.url) {
       return res.status(404).json({ error: "File not found" });
+    }
+
+    // ✅ Allow owner OR recipient of share OR public
+    if (item.userId !== userId) {
+      const share = await prisma.share.findFirst({
+        where: {
+          itemId: id,
+          OR: [
+            { sharedWith: userId },
+            { isPublic: true },
+          ],
+        },
+      });
+
+      if (!share) {
+        return res.status(403).json({ error: "Access denied" });
+      }
     }
 
     // Extract the key from the saved URL
@@ -386,20 +450,93 @@ export const getFileUrl = async (req: Request, res: Response) => {
 };
 
 
+// export const downloadFile = async (req: Request, res: Response) => {
+//   try {
+//     const { id } = req.params;
+
+//     const url = await generateDownloadLink(id);
+
+//     return res.json({ url });
+//   } catch (error: any) {
+//     console.error("Download error:", error.message);
+
+//     return res
+//       .status(500)
+//       .json({ error: error.message || "Failed to generate download link" });
+//   }
+// };
+
 
 export const downloadFile = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const userId = req.user?.id;
+
+    const item = await prisma.item.findUnique({ where: { id } });
+
+    if (!item || item.type === "folder" || !item.url) {
+      return res.status(404).json({ error: "File not found" });
+    }
+
+    // ✅ Allow owner OR recipient of share OR public
+    if (item.userId !== userId) {
+      const share = await prisma.share.findFirst({
+        where: {
+          itemId: id,
+          OR: [
+            { sharedWith: userId },
+            { isPublic: true },
+          ],
+        },
+      });
+
+      if (!share) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+    }
 
     const url = await generateDownloadLink(id);
-
     return res.json({ url });
   } catch (error: any) {
     console.error("Download error:", error.message);
-
     return res
       .status(500)
       .json({ error: error.message || "Failed to generate download link" });
   }
 };
 
+
+
+export const sharedItem = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+    const shares = await prisma.share.findMany({
+      where: { sharedWith: userId },
+      include: { item: true },
+    });
+
+    res.json(shares.map((s) => s.item));
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+// Get all items shared with the logged-in user
+export const getSharedWithMe = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const sharedItems = await getSharedWithUser(userId);
+
+    // Return just the item details
+    res.status(200).json(sharedItems.map((share) => share.item));
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};

@@ -155,32 +155,64 @@ export const deleteItem = async (itemId: string, userId: string) => {
 
 // Store shared item in DB
 
-export const createShare = async(userId:string,itemId:string, sharedWith:string, isPublic:boolean, permission:Permission)=>{
-  try{
-    const result =  await prisma.share.create({
-      data:{
+// export const createShare = async(userId:string,itemId:string, sharedWith:string, isPublic:boolean, permission:Permission)=>{
+//   try{
+//     const result =  await prisma.share.create({
+//       data:{
+//         itemId,
+//         sharedWith: isPublic ? null : sharedWith,
+//         isPublic,
+//         permission,       
+//       }
+//     });
+//         await prisma.activityLog.create({
+//         data: {
+//           userId,
+//           itemId,
+//           action: 'share',
+//         },
+//     });
+//     console.log(result);
+//     return result;
+
+//   }  catch(err:any){
+//       console.error('Prisma Error:', err.message);
+//       throw err;    
+//   }
+
+// }
+
+export const createShare = async (
+  userId: string,
+  itemId: string,
+  recipientUserId: string | null,
+  isPublic: boolean,
+  permission: Permission
+) => {
+  try {
+    const result = await prisma.share.create({
+      data: {
         itemId,
-        sharedWith: isPublic ? null : sharedWith,
+        sharedWith: isPublic ? null : recipientUserId, // ✅ userId instead of email
         isPublic,
-        permission,       
-      }
+        permission,
+      },
     });
-        await prisma.activityLog.create({
-        data: {
-          userId,
-          itemId,
-          action: 'share',
-        },
+
+    await prisma.activityLog.create({
+      data: {
+        userId,
+        itemId,
+        action: "share",
+      },
     });
-    console.log(result);
+
     return result;
-
-  }  catch(err:any){
-      console.error('Prisma Error:', err.message);
-      throw err;    
+  } catch (err: any) {
+    console.error("Prisma Error:", err.message);
+    throw err;
   }
-
-}
+};
 
 
 // Get Shared item from DB
@@ -334,3 +366,17 @@ export const generateDownloadLink = async (fileId: string) => {
 
 
 
+// Get all items shared with a user
+export const getSharedWithUser = async (userId: string) => {
+  return await prisma.share.findMany({
+    where: {
+      OR: [
+        { sharedWith: userId },   // explicitly shared
+        { isPublic: true },       // public shares
+      ],
+    },
+    include: {
+      item: true,
+    },
+  });
+};

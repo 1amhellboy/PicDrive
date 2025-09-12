@@ -128,14 +128,37 @@ export const uploadFile = async (file: File, parentId?: string | null) => {
 
 // ----------------- SHARING -----------------
 
-export type SharePayload = {
-  itemId: string;
-  sharedWith?: string;
-  isPublic?: boolean;
-  permission: "view" | "edit";
-};
+// export type SharePayload = {
+//   itemId: string;
+//   sharedWith?: string;
+//   isPublic?: boolean;
+//   permission: "view" | "edit";
+// };
 
-export const shareItem = async (payload: SharePayload) => {
+// export const shareItem = async (payload: SharePayload) => {
+//   const token = getToken();
+//   const res = await fetch(`${API_BASE}/items/share`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: token ? `Bearer ${token}` : "",
+//     },
+//     body: JSON.stringify(payload),
+//   });
+
+//   const data = await res.json();
+//   if (!res.ok) throw new Error(data.error || data.message || "Failed to share item");
+
+//   return data;
+// };
+
+// Share an item
+export const shareItem = async (
+  itemId: string,
+  recipientEmail: string,
+  isPublic: boolean,
+  permission: "viewer" | "editor"
+) => {
   const token = getToken();
   const res = await fetch(`${API_BASE}/items/share`, {
     method: "POST",
@@ -143,14 +166,36 @@ export const shareItem = async (payload: SharePayload) => {
       "Content-Type": "application/json",
       Authorization: token ? `Bearer ${token}` : "",
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      itemId,
+      sharedWith: recipientEmail,
+      isPublic,
+      permission,
+    }),
   });
 
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || data.message || "Failed to share item");
+  if (!res.ok) throw new Error(data.error || data.message || "Failed to share");
 
   return data;
 };
+
+// Get all items shared with logged-in user
+export const getSharedWithMe = async () => {
+  const token = getToken();
+  const res = await fetch(`${API_BASE}/items/shared/me`, {
+    headers: {
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+    cache: "no-store",
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || data.message || "Failed to fetch shared items");
+
+  return data;
+};
+
 
 
 // Move item to trash

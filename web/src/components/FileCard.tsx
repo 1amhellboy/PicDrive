@@ -935,6 +935,7 @@ const handleRename = async (newName: string) => {
         onClose={() => setShowShareModal(false)}
         fileName={fileName}
         fileType="file"
+        itemId={id}
       />
 
       {/* File Preview */}

@@ -22,7 +22,7 @@ export const DeleteItemSchema = z.object({
 });
 
 export const ShareItemSchema = z.object({
-  userId: z.string().uuid(),
+  // userId: z.string().uuid(),
   itemId: z.string().uuid(),
   sharedWith: z.string().email().optional(), // optional if public
   isPublic: z.boolean(),
