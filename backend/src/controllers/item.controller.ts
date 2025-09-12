@@ -1,6 +1,6 @@
 import {createItem, deleteItem, getItemsByParent, renameItem, createShare, getShared, handleFileUpload, moveToTrash, getTrashedItems, restoreItem, emptyTrash, createFolder} from '../services/item.service';
 import {Request, Response} from 'express';
-import { deleteFileFromS3 } from '../utils/s3';
+import { deleteFileFromS3, getSignedFileUrl } from '../utils/s3';
 import { userInfo } from 'os';
 import multer from 'multer';
 import { ItemType } from '../generated/prisma';
@@ -13,41 +13,21 @@ const upload = multer({ storage: multer.memoryStorage() });
 // helper inside controller (or move to utils)
 const normalizeParentId = async (parentId?: string | null): Promise<string | null> => {
   if (!parentId || parentId === "null" || parentId === "root") {
-    return null; // ✅ treat as root
+    return null; // treat as root
   }
 
   try {
     const parent = await prisma.item.findUnique({ where: { id: parentId } });
     if (!parent) {
-      console.warn(`⚠️ normalizeParentId: parentId ${parentId} not found, falling back to root`);
-      return null; // ✅ fallback instead of throwing
+      console.warn(`normalizeParentId: parentId ${parentId} not found, falling back to root`);
+      return null; // allback instead of throwing
     }
     return parent.id;
   } catch (err) {
     console.error("normalizeParentId error:", err);
-    return null; // ✅ fallback to root on DB error
+    return null; // fallback to root on DB error
   }
 };
-
-
-
-// Create (file or folder)
-// export const create = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const { name, type, parentId, mimeType, size, url } = req.body;
-//     const userId = req.user?.id;
-
-//     if (!userId) {
-//       res.status(401).json({ message: 'Unauthorized: userId missing' });
-//       return;
-//     }
-
-//     const item = await createItem(name, type, userId, parentId || null, mimeType, size, url);
-//     res.status(201).json(item);
-//   } catch (err: any) {
-//     res.status(500).json({ message: err.message || 'Failed to create item' });
-//   }
-// };
 
 
 export const create = async (req: Request, res: Response): Promise<void> => {
@@ -69,23 +49,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// Read (get items by parent)
-// export const getByParent = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const { parentId } = req.params;
-//     const userId = req.user?.id;
 
-//     if (!userId) {
-//       res.status(401).json({ message: 'Unauthorized: userId missing' });
-//       return;
-//     }
-
-//     const items = await getItemsByParent(parentId === 'root' ? null : parentId, userId);
-//     res.status(200).json(items);
-//   } catch (err: any) {
-//     res.status(500).json({ message: err.message || 'Failed to fetch items' });
-//   }
-// };
 export const getByParent = async (req: Request, res: Response): Promise<void> => {
   try {
     const { parentId } = req.params;
@@ -130,63 +94,6 @@ export const rename = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// Delete
-// export const remove = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const { id } = req.params;
-//     const userId = req.user?.id;
-
-//     if (!userId) {
-//       res.status(401).json({ message: 'Unauthorized: userId missing' });
-//       return;
-//     }
-
-//     await deleteItem(id, userId);
-//     res.status(204).json({ message: 'Item deleted successfully' });
-//   } catch (err: any) {
-//     res.status(500).json({ message: err.message || 'Failed to delete item' });
-//   }
-// };
-
-// export const remove = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const { id } = req.params;
-//     const userId = req.user?.id;
-
-//     if (!userId) {
-//       res.status(401).json({ message: 'Unauthorized: userId missing' });
-//       return;
-//     }
-
-//     // 1. Find the item in DB to get its S3 key
-//     const item = await prisma.item.findUnique({
-//       where: { id },
-//     });
-
-//     if (!item || item.userId !== userId) {
-//       res.status(404).json({ message: 'Item not found or unauthorized' });
-//       return;
-//     }
-
-//     // 2. Delete from DB
-//     await deleteItem(id, userId);
-
-//     // 3. If it's a file, delete from S3
-//     if (item.type === 'file' && item.url) {
-//       try {
-//         const key = item.url.split('/').pop(); // extract the key from the URL
-//         if (key) await deleteFileFromS3(key);
-//       } catch (s3Error) {
-//         console.error("S3 deletion failed:", s3Error);
-//         // Not throwing here because DB deletion was successful
-//       }
-//     }
-
-//     res.status(200).json({ message: 'Item deleted successfully' });
-//   } catch (err: any) {
-//     res.status(500).json({ message: err.message || 'Failed to delete item' });
-//   }
-// };
 
 export const remove = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -260,63 +167,6 @@ export const accessSharedItem = async (req: Request, res: Response): Promise<voi
   }
 };
 
-
-// Upload to AWS
-
-// export const uploadFile = async (req: Request, res: Response) => {
-//   const userId = req.user?.id;
-//   if (!userId) {res.status(401).json({ error: "Unauthorized" })
-//     return;
-//   }
-
-//   if (!req.file) { res.status(400).json({ error: "File is required" })
-//     return;
-//   }
-
-//   let uploaded;
-//   try {
-//     // 1. Upload to S3
-//     uploaded = await handleFileUpload(req.file);
-
-//     // 2. Save metadata in DB
-//     const savedItem = await createItem(
-//       req.file.originalname,
-//       "file",
-//       userId,
-//       req.body.parentId || null,
-//       req.file.mimetype,
-//       req.file.size,
-//       uploaded.url
-//     );
-
-//     // 3. Log activity (upload)
-//     await prisma.activityLog.create({
-//       data: {
-//         userId,
-//         itemId: savedItem.id,
-//         action: "upload",
-//       },
-//     });
-
-//     res.status(201).json({
-//       message: "Upload successful",
-//       file: savedItem,
-//     });
-//   } catch (error) {
-//     console.error("Upload failed:", error);
-
-//     // Rollback: delete file from S3 if DB operation failed
-//     if (uploaded?.key) {
-//       try {
-//         await deleteFileFromS3(uploaded.key);
-//       } catch (s3Error) {
-//         console.error("Rollback failed: Could not delete from S3", s3Error);
-//       }
-//     }
-
-//     res.status(500).json({ error: "Upload failed, rolled back" });
-//   }
-// };
 
 
 export const uploadFile = async (req: Request, res: Response) => {
@@ -438,188 +288,6 @@ export const clearTrash = async (req: Request, res: Response): Promise<void> => 
 };
 
 
-// export const uploadFolder = async (req: Request, res: Response) => {
-//   const userId = req.user?.id;
-//   if (!userId) {
-//     res.status(401).json({ error: "Unauthorized" });
-//     return;
-//   }
-
-//   if (!req.files || !(req.files instanceof Array)) {
-//     res.status(400).json({ error: "No files uploaded" });
-//     return;
-//   }
-
-//   try {
-//     const parentId = req.body.parentId || null;
-//     const uploadedItems = [];
-
-//     for (const file of req.files as Express.Multer.File[]) {
-//       const uploaded = await handleFileUpload(file);
-
-//       const savedItem = await createItem(
-//         file.originalname,
-//         "file",
-//         userId,
-//         parentId, // use parentId from request (represents folder in DB)
-//         file.mimetype,
-//         file.size,
-//         uploaded.url
-//       );
-
-//       // Log activity
-//       await prisma.activityLog.create({
-//         data: {
-//           userId,
-//           itemId: savedItem.id,
-//           action: "upload",
-//         },
-//       });
-
-//       uploadedItems.push(savedItem);
-//     }
-
-//     res.status(201).json({
-//       message: "Folder uploaded successfully",
-//       items: uploadedItems,
-//     });
-//   } catch (err) {
-//     console.error("Folder upload failed:", err);
-//     res.status(500).json({ error: "Folder upload failed" });
-//   }
-// };
-
-// Upload Folder + Maintain Hierarchy
-// export const uploadFolder = async (req: Request, res: Response) => {
-//   const userId = req.user?.id;
-//   if (!userId) {
-//     res.status(401).json({ error: "Unauthorized" });
-//     return;
-//   }
-
-//   if (!req.files || !(req.files instanceof Array)) {
-//     res.status(400).json({ error: "No files provided" });
-//     return;
-//   }
-
-//   try {
-//     // ✅ normalize the top-level parent (in case you upload into an existing folder)
-//     const rootParentId = await normalizeParentId(req.body.parentId);
-
-//     // Map to track folder paths → DB IDs
-//     const folderMap: Record<string, string | null> = { "": rootParentId };
-
-//     for (const file of req.files as Express.Multer.File[]) {
-//       // e.g. "myFolder/subFolder/file.txt"
-//       const relativePath = (file as any).webkitRelativePath || file.originalname;
-//       const parts = relativePath.split("/");
-
-//       let currentParentId: string | null = rootParentId;
-//       let currentPath = "";
-
-//       // Rebuild folders
-//       for (let i = 0; i < parts.length - 1; i++) {
-//         currentPath += (currentPath ? "/" : "") + parts[i];
-
-//         if (!folderMap[currentPath]) {
-//           const folder = await createFolder(parts[i], userId, currentParentId);
-//           folderMap[currentPath] = folder.id;
-//         }
-//         currentParentId = folderMap[currentPath];
-//       }
-
-//       // Upload file to S3
-//       const uploaded = await handleFileUpload(file);
-
-//       // Save file in DB
-//       await createItem(
-//         file.originalname,
-//         "file",
-//         userId,
-//         currentParentId,
-//         file.mimetype,
-//         file.size,
-//         uploaded.url
-//       );
-//     }
-
-//     res.status(201).json({ message: "Folder uploaded successfully" });
-//   } catch (error: any) {
-//     console.error("Folder upload failed:", error);
-//     res.status(500).json({ error: error.message || "Folder upload failed" });
-//   }
-// };
-
-// export const uploadFolder = async (req: Request, res: Response) => {
-//   const userId = req.user?.id;
-//   if (!userId) {
-//     res.status(401).json({ error: "Unauthorized" });
-//     return;
-//   }
-
-//   if (!req.files || !(req.files instanceof Array)) {
-//     res.status(400).json({ error: "No files provided" });
-//     return;
-//   }
-
-//   try {
-//     // ✅ normalize parentId (destination folder, if uploading inside an existing one)
-//     const rootParentId = await normalizeParentId(req.body.parentId);
-
-//     // Take the first file’s relative path → extract top-level folder name
-//     const firstFile = req.files[0] as any;
-//     const relativePath = firstFile.webkitRelativePath;
-//     const topLevelFolder = relativePath ? relativePath.split("/")[0] : null;
-
-//     // ✅ Create the top-level folder in DB
-//     let topFolderId = rootParentId;
-//     if (topLevelFolder) {
-//       const topFolder = await createFolder(topLevelFolder, userId, rootParentId);
-//       topFolderId = topFolder.id;
-//     }
-
-//     // Map to track subfolders
-//     const folderMap: Record<string, string | null> = { "": topFolderId };
-
-//     for (const file of req.files as Express.Multer.File[]) {
-//       const relativePath = (file as any).webkitRelativePath || file.originalname;
-//       const parts = relativePath.split("/");
-
-//       let currentParentId: string | null = topFolderId;
-//       let currentPath = topLevelFolder || "";
-
-//       // ✅ build subfolders under top-level folder
-//       for (let i = 1; i < parts.length - 1; i++) {
-//         currentPath += "/" + parts[i];
-//         if (!folderMap[currentPath]) {
-//           const folder = await createFolder(parts[i], userId, currentParentId);
-//           folderMap[currentPath] = folder.id;
-//         }
-//         currentParentId = folderMap[currentPath];
-//       }
-
-//       // Upload file to S3
-//       const uploaded = await handleFileUpload(file);
-
-//       // Save file in DB
-//       await createItem(
-//         file.originalname,
-//         "file",
-//         userId,
-//         currentParentId,
-//         file.mimetype,
-//         file.size,
-//         uploaded.url
-//       );
-//     }
-
-//     res.status(201).json({ message: "Folder uploaded successfully" });
-//   } catch (error: any) {
-//     console.error("Folder upload failed:", error);
-//     res.status(500).json({ error: error.message || "Folder upload failed" });
-//   }
-// };
-
 export const uploadFolder = async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
@@ -635,14 +303,14 @@ export const uploadFolder = async (req: Request, res: Response) => {
     const folderMap: Record<string, string | null> = { "": rootParentId };
 
     for (const file of req.files as Express.Multer.File[]) {
-      // ✅ originalname contains relative path because frontend preserved it
+      //  originalname contains relative path because frontend preserved it
       const relativePath = file.originalname;
       const parts = relativePath.split("/");
 
       let currentParentId: string | null = rootParentId;
       let currentPath = "";
 
-      // ✅ Create missing folders
+      //  Create missing folders
       for (let i = 0; i < parts.length - 1; i++) {
         currentPath += (currentPath ? "/" : "") + parts[i];
 
@@ -653,7 +321,7 @@ export const uploadFolder = async (req: Request, res: Response) => {
         currentParentId = folderMap[currentPath];
       }
 
-      // ✅ Upload the actual file to S3
+      //  Upload the actual file to S3
       const uploaded = await handleFileUpload(file);
 
       await createItem(
@@ -671,5 +339,32 @@ export const uploadFolder = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error("Folder upload failed:", error);
     res.status(500).json({ error: error.message || "Folder upload failed" });
+  }
+};
+
+
+
+export const getFileUrl = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+
+    const item = await prisma.item.findUnique({ where: { id } });
+
+    if (!item || item.userId !== userId || !item.url) {
+      return res.status(404).json({ error: "File not found" });
+    }
+
+    // Extract the key from the saved URL
+    const key = item.url.split("/").pop();
+    if (!key) {
+      return res.status(400).json({ error: "Invalid file URL in DB" });
+    }
+
+    const signedUrl = await getSignedFileUrl(key);
+    res.json({ url: signedUrl });
+  } catch (err: any) {
+    console.error("getFileUrl error:", err);
+    res.status(500).json({ error: err.message || "Failed to generate signed URL" });
   }
 };

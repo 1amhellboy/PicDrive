@@ -247,6 +247,7 @@ import RenameModal from "../components/RenamModel"
 import ShareModal from "../components/ShareModel"
 import { moveToTrash } from "../lib/item.service";
 import FilePreview from "../components/FilePreview";
+import { getFileUrl } from "../lib/item.service";
 
 interface FileCardProps {
   id:string
@@ -255,6 +256,7 @@ interface FileCardProps {
   size: string
   modifiedDate: string
   thumbnail?: string
+  fileUrl?: string
   onClick?: () => void
   viewMode?: "grid" | "list"
   onTrashed?: () => void;
@@ -267,6 +269,7 @@ const FileCard: React.FC<FileCardProps> = ({
   size,
   modifiedDate,
   thumbnail,
+  fileUrl,
   onClick,
   onTrashed,
   viewMode = "grid",
@@ -277,6 +280,7 @@ const FileCard: React.FC<FileCardProps> = ({
   const [fileName, setFileName] = useState(name)
   const menuRef = useRef<HTMLDivElement>(null)
   const [showFilePreview, setShowFilePreview] = useState(false)
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -328,9 +332,19 @@ const FileCard: React.FC<FileCardProps> = ({
       case "share":
         setShowShareModal(true)
         break
+      // case "open":
+      //   setShowFilePreview(true)
+      //   break
       case "open":
-        setShowFilePreview(true)
-        break
+      try {
+        console.log(`Fetching signed URL for: ${fileName}`);
+        const url = await getFileUrl(id);   // 🔑 call backend
+        setSignedUrl(url);
+        setShowFilePreview(true);
+      } catch (err: any) {
+        alert(err.message || "Failed to fetch file preview");
+      }
+      break;
       case "download":
       case "delete":
       try {
@@ -512,7 +526,9 @@ const FileCard: React.FC<FileCardProps> = ({
         onClose={() => setShowFilePreview(false)}
         fileName={fileName}
         fileType={type}
+        fileUrl={signedUrl || undefined}   
       />
+      {showFilePreview && console.log("Previewing file:", fileName, signedUrl)}
     </>
   )
 }

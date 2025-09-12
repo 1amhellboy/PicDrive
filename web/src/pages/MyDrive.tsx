@@ -123,6 +123,7 @@ const MyDrive: React.FC<MyDriveProps> = ({ viewMode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+
 const mapMimeToType = (mimeType?: string) => {
   if (!mimeType) return "other" as const;
   if (mimeType.startsWith("image/")) return "image" as const;
@@ -219,10 +220,12 @@ const mapMimeToType = (mimeType?: string) => {
                 //     })
                 //   : "No Date"
                 // }
+                fileUrl={file.url}
                 onTrashed={() => setItems((prev) => prev.filter((i) => i.id !== file.id))}
                 modifiedDate={formatRelativeDate(file.createdAt)}
                 viewMode="list"
                 onClick={() => console.log(`Open file: ${file.name}`)}
+                
               />
             ))}
           </div>
@@ -269,6 +272,7 @@ const mapMimeToType = (mimeType?: string) => {
               //     })
               //   : "No Date"
               // }
+              fileUrl={file.url}
               modifiedDate={formatRelativeDate(file.createdAt)}
               viewMode="grid"
               onClick={() => console.log(`Open file: ${file.name}`)}

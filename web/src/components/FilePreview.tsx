@@ -29,6 +29,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
   const isPdf = extension === "pdf"
 
   const renderPreview = () => {
+    console.log("Previewing:", fileName, "url:", fileUrl);
     if (isImage) {
       return (
         <div className="flex items-center justify-center h-full">
@@ -99,3 +100,101 @@ const FilePreview: React.FC<FilePreviewProps> = ({
 }
 
 export default FilePreview
+
+// "use client";
+
+// import { X, Download, AlertCircle } from "lucide-react";
+
+// interface FilePreviewProps {
+//   isOpen: boolean;
+//   onClose: () => void;
+//   fileName: string;
+//   fileType: "image" | "video" | "audio" | "document" | "archive" | "other" | "spreadsheet" | "presentation";
+//   fileUrl?: string;
+// }
+
+// const FilePreview: React.FC<FilePreviewProps> = ({
+//   isOpen,
+//   onClose,
+//   fileName,
+//   fileType,
+//   fileUrl,
+// }) => {
+//   if (!isOpen) return null;
+
+//   const extension = fileName.split(".").pop()?.toLowerCase();
+
+//   const renderPreview = () => {
+//     if (fileType === "image") {
+//       return (
+//         <img
+//           src={fileUrl}
+//           alt={fileName}
+//           className="max-w-full max-h-full object-contain rounded"
+//         />
+//       );
+//     }
+
+//     if (extension === "pdf") {
+//       return (
+//         <iframe
+//           src={fileUrl}
+//           title={fileName}
+//           className="w-full h-full rounded"
+//         />
+//       );
+//     }
+
+//     return (
+//       <div className="flex flex-col items-center justify-center h-full text-gray-500">
+//         <AlertCircle className="w-16 h-16 mb-4" />
+//         <h3 className="text-lg font-medium mb-2">No preview available</h3>
+//         <p className="text-sm mb-4">This file type cannot be previewed</p>
+//         <a
+//           href={fileUrl}
+//           download={fileName}
+//           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+//         >
+//           <Download className="w-4 h-4 mr-2 inline" />
+//           Download
+//         </a>
+//       </div>
+//     );
+//   };
+
+//   return (
+//     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+//       <div className="bg-white rounded-lg shadow-xl w-[90vw] h-[90vh] max-w-4xl flex flex-col">
+//         {/* Header */}
+//         <div className="flex items-center justify-between p-4 border-b border-gray-200">
+//           <h2 className="text-lg font-medium text-gray-900 truncate">{fileName}</h2>
+//           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
+//             <X className="w-5 h-5" />
+//           </button>
+//         </div>
+
+//         {/* Content */}
+//         <div className="flex-1 flex items-center justify-center overflow-hidden p-4">
+//           {renderPreview()}
+//         </div>
+
+//         {/* Footer */}
+//         <div className="flex items-center justify-between p-4 border-t border-gray-200">
+//           <span className="text-sm text-gray-500">{fileType.toUpperCase()}</span>
+//           {fileUrl && (
+//             <a
+//               href={fileUrl}
+//               download={fileName}
+//               className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg"
+//             >
+//               <Download className="w-4 h-4 inline mr-1" />
+//               Download
+//             </a>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default FilePreview;

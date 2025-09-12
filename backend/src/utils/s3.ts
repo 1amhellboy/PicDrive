@@ -1,4 +1,5 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from 'crypto';
 import path from 'path';
 import dotenv from 'dotenv';
@@ -38,4 +39,13 @@ export const deleteFileFromS3 = async (key: string) => {
     Key: key,
   });
   await s3.send(command);
+};
+
+
+export const getSignedFileUrl = async (key: string) => {
+  const command = new GetObjectCommand({
+    Bucket: process.env.AWS_BUCKET_NAME!,
+    Key: key,
+  });
+  return getSignedUrl(s3, command, { expiresIn: 60 * 5 }); // 5 min URL
 };

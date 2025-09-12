@@ -318,3 +318,32 @@ export const uploadFolder = async (formData: FormData) => {
 
   return data;
 };
+
+
+// export const getFileUrl = async (id: string) => {
+//   const token = getToken(); // make sure this returns the JWT
+//   const res = await fetch(`${API_BASE}/items/${id}/url`, {
+//     method: "GET",
+//     headers: {
+//       Authorization: token ? `Bearer ${token}` : "",
+//     },
+//   });
+
+//   const data = await res.json();
+//   if (!res.ok) throw new Error(data.error || "Failed to fetch file URL");
+
+//   return data.url;
+// };
+
+export const getFileUrl = async (id: string): Promise<string> => {
+  const token = getToken();
+  const res = await fetch(`${API_BASE}/items/${id}/url`, {
+    headers: {
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || data.message || "Failed to fetch file URL");
+
+  return data.url; // 🔑 ensures FileCard gets only the URL
+};
