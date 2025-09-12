@@ -16,27 +16,7 @@ export type Item = {
 // Helper to get token
 const getToken = () => localStorage.getItem("accessToken");
 
-// ----------------- CRUD -----------------
 
-// Get items by parent
-// export const getItems = async (
-//   parentId: string | "root" = "root"
-// ): Promise<Item[]> => {
-//   const token = getToken();
-//   const res = await fetch(`${API_BASE}/items/${parentId}`, {
-//     method: "GET",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: token ? `Bearer ${token}` : "",
-//     },
-//   });
-
-//   const data = await res.json();
-//   if (!res.ok) throw new Error(data.error || data.message || "Failed to fetch items");
-
-//   return data;
-// };
-// Get items by parent
 export const getItems = async (parentId: string | "root" = "root"): Promise<Item[]> => {
   const token = localStorage.getItem("accessToken");
 
@@ -189,21 +169,6 @@ export const moveToTrash = async (id: string) => {
   return data;
 };
 
-// // Restore item from trash
-// export const restoreItem = async (id: string) => {
-//   const token = getToken();
-//   const res = await fetch(`${API_BASE}/items/${id}/restore`, {
-//     method: "PATCH",
-//     headers: {
-//       Authorization: token ? `Bearer ${token}` : "",
-//     },
-//   });
-
-//   const data = await res.json();
-//   if (!res.ok) throw new Error(data.error || data.message || "Failed to restore item");
-
-//   return data;
-// };
 
 
 // Get trashed items
@@ -273,37 +238,6 @@ export const emptyTrash = async () => {
 };
 
 
-// UPLOAD FOLDER
-
-//  Uploads a folder (with nested files) to the backend.
-//  Uses `webkitdirectory` from <input> to preserve folder structure.
-
-// export const uploadFolder = async (files: FileList, parentId?: string | null) => {
-//   const token = getToken();
-//   const formData = new FormData();
-
-//   // append all files with their relative paths
-//   Array.from(files).forEach((file) => {
-//     // preserve folder hierarchy for backend
-//     formData.append("files", file, (file as any).webkitRelativePath || file.name);
-//   });
-
-//   if (parentId) formData.append("parentId", parentId);
-
-//   const res = await fetch(`${API_BASE}/items/upload-folder`, {
-//     method: "POST",
-//     headers: {
-//       Authorization: token ? `Bearer ${token}` : "",
-//     },
-//     body: formData,
-//   });
-
-//   const data = await res.json();
-//   if (!res.ok) throw new Error(data.error || data.message || "Folder upload failed");
-
-//   return data;
-// };
-
 // item.service.ts
 export const uploadFolder = async (formData: FormData) => {
   const token = getToken();
@@ -323,20 +257,6 @@ export const uploadFolder = async (formData: FormData) => {
 };
 
 
-// export const getFileUrl = async (id: string) => {
-//   const token = getToken(); // make sure this returns the JWT
-//   const res = await fetch(`${API_BASE}/items/${id}/url`, {
-//     method: "GET",
-//     headers: {
-//       Authorization: token ? `Bearer ${token}` : "",
-//     },
-//   });
-
-//   const data = await res.json();
-//   if (!res.ok) throw new Error(data.error || "Failed to fetch file URL");
-
-//   return data.url;
-// };
 
 export const getFileUrl = async (id: string): Promise<string> => {
   const token = getToken();
@@ -351,75 +271,6 @@ export const getFileUrl = async (id: string): Promise<string> => {
   return data.url; // 🔑 ensures FileCard gets only the URL
 };
 
-
-
-
-// export const downloadFile = async (id: string) => {
-//   const res = await fetch(`/api/items/${id}/download`, {
-//     method: "GET",
-//     headers: {
-//       Authorization: `Bearer ${localStorage.getItem("token")}`, // adjust if you store token differently
-//     },
-//   });
-
-//   if (!res.ok) {
-//     throw new Error("Failed to get download link");
-//   }
-
-//   const { url } = await res.json();
-
-//   // Trigger browser download
-//   const link = document.createElement("a");
-//   link.href = url;
-//   link.download = ""; // backend sets filename
-//   document.body.appendChild(link);
-//   link.click();
-//   link.remove();
-// };
-
-
-// export const downloadFile = async (id: string) => {
-//   const res = await fetch(`${API_BASE}/items/${id}/download`, {
-//     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-//   });
-
-//   // Debug what actually comes back
-//   const contentType = res.headers.get("content-type");
-
-//   if (contentType && contentType.includes("application/json")) {
-//     const { url } = await res.json();
-//     const link = document.createElement("a");
-//     link.href = url;
-//     link.download = "";
-//     document.body.appendChild(link);
-//     link.click();
-//     link.remove();
-//   } else {
-//     const text = await res.text();
-//     console.error("Non-JSON response:", text);
-//     throw new Error("Backend did not return JSON (check route or proxy)");
-//   }
-// };
-
-// export const downloadFile = async (id: string, name: string) => {
-//   const res = await fetch(`${API_BASE}/items/${id}/download`, {
-//     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-//   });
-
-//   if (!res.ok) {
-//     const text = await res.text();
-//     throw new Error(text || "Download failed");
-//   }
-
-//   const { url } = await res.json();
-
-//   const link = document.createElement("a");
-//   link.href = url;
-//   link.download = name; // ✅ ensures filename is respected
-//   document.body.appendChild(link);
-//   link.click();
-//   link.remove();
-// };
 
 export const downloadFile = async (id: string, name: string) => {
   const token = getToken();
