@@ -20,13 +20,24 @@ const RenameModal: React.FC<RenameModalProps> = ({ isOpen, onClose, currentName,
     }
   }, [isOpen, currentName])
 
+  // const handleSubmit = (e: React.FormEvent) => {
+  //   e.preventDefault()
+  //   if (newName.trim() && newName !== currentName) {
+  //     onRename(newName.trim())
+  //   }
+  //   onClose()
+  // }
+
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (newName.trim() && newName !== currentName) {
-      onRename(newName.trim())
-    }
-    onClose()
+  e.preventDefault()
+  const trimmed = newName.trim()
+  if (!trimmed || trimmed === currentName) {
+    return onClose() // don't allow empty or unchanged
   }
+  onRename(trimmed)
+  onClose()
+}
+
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {

@@ -9,6 +9,11 @@ import { rateLimiter } from './middlewares/rateLimiter';
 
 const app = express();
 app.use(express.json());
+app.use((req, res, next) => {
+  console.log("📩 Incoming Request:", req.method, req.url);
+  console.log("📦 Body:", req.body);
+  next();
+});
 
 // middlewares
 app.use(corsMiddleware);// To allow your frontend (on different domain/port) to access backend APIs.

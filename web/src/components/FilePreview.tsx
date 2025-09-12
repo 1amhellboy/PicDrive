@@ -56,13 +56,13 @@ const FilePreview: React.FC<FilePreviewProps> = ({
         <AlertCircle className="w-16 h-16 mb-4" />
         <h3 className="text-lg font-medium mb-2">No preview available</h3>
         <p className="text-sm mb-4">This file type cannot be previewed</p>
-        <button
+        {/* <button
           onClick={() => console.log(`Download: ${fileName}`)}
           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           <Download className="w-4 h-4 mr-2" />
           Download instead
-        </button>
+        </button> */}
       </div>
     )
   }
@@ -86,13 +86,13 @@ const FilePreview: React.FC<FilePreviewProps> = ({
           <span className="text-sm text-gray-500">
             {fileType.charAt(0).toUpperCase() + fileType.slice(1)} • {extension.toUpperCase()}
           </span>
-          <button
+          {/* <button
             onClick={() => console.log(`Download: ${fileName}`)}
             className="flex items-center px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
           >
             <Download className="w-4 h-4 mr-1" />
             Download
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

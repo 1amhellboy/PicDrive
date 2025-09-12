@@ -1,5 +1,5 @@
 import { PrismaClient,Permission } from '../generated/prisma';
-import { uploadFileToS3,deleteFileFromS3 } from '../utils/s3';
+import { uploadFileToS3,deleteFileFromS3,getDownloadUrl,getS3KeyFromUrl } from '../utils/s3';
 
 const prisma = new PrismaClient();
 
@@ -242,6 +242,17 @@ export const getShared = async(shareId:string)=>{
 
 export const handleFileUpload = async (file: Express.Multer.File) => {
   const result = await uploadFileToS3(file);
+  // await prisma.item.create({
+  //   data: {
+  //     name: file.originalname,  // ✅ keeps "resume.pdf"
+  //     mimeType: file.mimetype,  // ✅ keeps "application/pdf"
+  //     size: file.size,
+  //     url: result.url,          // full S3 URL
+  //     type: "file",
+  //     userId: "...",
+  //     parentId: null,
+  //   },
+  // });
   return result;
 };
 
@@ -392,4 +403,57 @@ export const emptyTrash = async (userId: string) => {
     throw new Error("Failed to empty trash");
   }
 };
+
+
+
+// export const generateDownloadLink = async (fileId: string) => {
+//   const file = await prisma.item.findUnique({ where: { id: fileId } });
+
+//   if (!file || file.type === "folder" || !file.url) {
+//     throw new Error("File not found or is a folder");
+//   }
+
+//   const key = getS3KeyFromUrl(file.url);
+//   const url = await getDownloadUrl(key, file.name);
+
+//   return url;
+// };
+
+// export const generateDownloadLink = async (fileId: string) => {
+//   const file = await prisma.item.findUnique({ where: { id: fileId } });
+
+//   if (!file || file.type === "folder" || !file.url) {
+//     throw new Error("File not found or is a folder");
+//   }
+
+//   const key = getS3KeyFromUrl(file.url);
+
+//   const url = await getDownloadUrl(
+//     key,
+//     file.name,         // full name with extension
+//     file.mimeType || "application/octet-stream" // fallback if not stored
+//   );
+
+//   return url;
+// };
+
+export const generateDownloadLink = async (fileId: string) => {
+  const file = await prisma.item.findUnique({ where: { id: fileId } });
+
+  if (!file || file.type === "folder" || !file.url) {
+    throw new Error("File not found or is a folder");
+  }
+
+  const key = getS3KeyFromUrl(file.url);
+
+  const url = await getDownloadUrl(
+    key,
+    file.name,                             // ✅ correct filename with extension
+    file.mimeType || "application/octet-stream" // ✅ fallback if missing
+  );
+
+  return url;
+};
+
+
 

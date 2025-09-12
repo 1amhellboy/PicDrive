@@ -1,4 +1,4 @@
-import {createItem, deleteItem, getItemsByParent, renameItem, createShare, getShared, handleFileUpload, moveToTrash, getTrashedItems, restoreItem, emptyTrash, createFolder} from '../services/item.service';
+import {createItem, deleteItem, getItemsByParent, renameItem, createShare, getShared, handleFileUpload, moveToTrash, getTrashedItems, restoreItem, emptyTrash, createFolder, generateDownloadLink} from '../services/item.service';
 import {Request, Response} from 'express';
 import { deleteFileFromS3, getSignedFileUrl } from '../utils/s3';
 import { userInfo } from 'os';
@@ -76,23 +76,86 @@ export const getByParent = async (req: Request, res: Response): Promise<void> =>
 };
 
 // Update (rename)
+// export const rename = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const { id } = req.params;
+//     const { name } = req.body;
+//     const userId = req.user?.id;
+
+//     if (!userId) {
+//       res.status(401).json({ message: 'Unauthorized: userId missing' });
+//       return;
+//     }
+
+//     const updated = await renameItem(id, name, userId);
+//     res.status(200).json(updated);
+//   } catch (err: any) {
+//     res.status(500).json({ message: err.message || 'Failed to rename item' });
+//   }
+// };
+
+// export const rename = async (req: Request, res: Response): Promise<void> => {
+//   try {
+
+//     console.log("Rename request params:", req.params);
+//     console.log("Rename request body:", req.body);
+
+//     const { id } = req.params
+//     const { name } = req.body
+//     const userId = req.user?.id
+
+
+//     if (!userId) {
+//       res.status(401).json({ message: "Unauthorized: userId missing" })
+//       return
+//     }
+
+//     if (!name || typeof name !== "string" || !name.trim()) {
+//       res.status(400).json({ message: "Invalid name" })
+//       return
+//     }
+
+//     const updated = await renameItem(id, name.trim(), userId)
+//     res.status(200).json(updated)
+//   } catch (err: any) {
+//     res.status(500).json({ message: err.message || "Failed to rename item" })
+//   }
+// }
+
+
 export const rename = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log("🟢 Rename request params:", req.params);
+    console.log("🟢 Rename request body:", req.body);
+
     const { id } = req.params;
     const { name } = req.body;
     const userId = req.user?.id;
 
     if (!userId) {
-      res.status(401).json({ message: 'Unauthorized: userId missing' });
-      return;
+      res.status(401).json({ message: "Unauthorized: userId missing" });
+      return 
     }
 
-    const updated = await renameItem(id, name, userId);
-    res.status(200).json(updated);
+    if (!name || typeof name !== "string" || !name.trim()) {
+      res.status(400).json({ message: "Invalid name", received: req.body })
+      return 
+    }
+
+    const updated = await renameItem(id, name.trim(), userId);
+
+    if (updated.count === 0) {
+      res.status(404).json({ message: "Item not found or unauthorized" })
+      return 
+    }
+
+    res.status(200).json({ message: "Item renamed", name });
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to rename item' });
+    console.error("❌ Rename error:", err);
+    res.status(500).json({ message: err.message || "Failed to rename item" });
   }
 };
+
 
 
 export const remove = async (req: Request, res: Response): Promise<void> => {
@@ -368,3 +431,22 @@ export const getFileUrl = async (req: Request, res: Response) => {
     res.status(500).json({ error: err.message || "Failed to generate signed URL" });
   }
 };
+
+
+
+export const downloadFile = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const url = await generateDownloadLink(id);
+
+    return res.json({ url });
+  } catch (error: any) {
+    console.error("Download error:", error.message);
+
+    return res
+      .status(500)
+      .json({ error: error.message || "Failed to generate download link" });
+  }
+};
+

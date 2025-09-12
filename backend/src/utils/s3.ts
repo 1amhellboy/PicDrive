@@ -3,6 +3,8 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from 'crypto';
 import path from 'path';
 import dotenv from 'dotenv';
+import { PrismaClient,Permission } from '../generated/prisma';
+const prisma = new PrismaClient();
 
 dotenv.config();
 
@@ -49,3 +51,47 @@ export const getSignedFileUrl = async (key: string) => {
   });
   return getSignedUrl(s3, command, { expiresIn: 60 * 5 }); // 5 min URL
 };
+
+
+// export const getDownloadUrl = async (
+//   key: string,
+//   filename: string,
+//   contentType?: string
+// ) => {
+//   const command = new GetObjectCommand({
+//     Bucket: process.env.AWS_BUCKET_NAME!,
+//     Key: key,
+//     ResponseContentDisposition: `attachment; filename="${filename}"`,
+//     ResponseContentType: contentType || "application/octet-stream",
+//   });
+
+//   return await getSignedUrl(s3, command, { expiresIn: 60 });
+// };
+
+export const getDownloadUrl = async (
+  key: string,
+  filename: string,
+  contentType?: string
+) => {
+  const command = new GetObjectCommand({
+    Bucket: process.env.AWS_BUCKET_NAME!,
+    Key: key,
+    ResponseContentDisposition: `attachment; filename="${filename}"`,
+    ResponseContentType: contentType || "application/octet-stream",
+  });
+
+  return await getSignedUrl(s3, command, { expiresIn: 60 });
+};
+
+
+
+export const getS3KeyFromUrl = (url: string) => {
+  try {
+    const parsedUrl = new URL(url);
+    // Key is everything after the bucket domain
+    return decodeURIComponent(parsedUrl.pathname.slice(1));
+  } catch {
+    // If it's not a valid URL, assume it's already a key
+    return url;
+  }
+}

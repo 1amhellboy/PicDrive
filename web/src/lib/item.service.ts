@@ -103,6 +103,9 @@ export const renameItem = async (id: string, name: string) => {
   return data;
 };
 
+
+
+
 // Delete item
 export const deleteItem = async (id: string) => {
   const token = getToken();
@@ -347,3 +350,95 @@ export const getFileUrl = async (id: string): Promise<string> => {
 
   return data.url; // 🔑 ensures FileCard gets only the URL
 };
+
+
+
+
+// export const downloadFile = async (id: string) => {
+//   const res = await fetch(`/api/items/${id}/download`, {
+//     method: "GET",
+//     headers: {
+//       Authorization: `Bearer ${localStorage.getItem("token")}`, // adjust if you store token differently
+//     },
+//   });
+
+//   if (!res.ok) {
+//     throw new Error("Failed to get download link");
+//   }
+
+//   const { url } = await res.json();
+
+//   // Trigger browser download
+//   const link = document.createElement("a");
+//   link.href = url;
+//   link.download = ""; // backend sets filename
+//   document.body.appendChild(link);
+//   link.click();
+//   link.remove();
+// };
+
+
+// export const downloadFile = async (id: string) => {
+//   const res = await fetch(`${API_BASE}/items/${id}/download`, {
+//     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+//   });
+
+//   // Debug what actually comes back
+//   const contentType = res.headers.get("content-type");
+
+//   if (contentType && contentType.includes("application/json")) {
+//     const { url } = await res.json();
+//     const link = document.createElement("a");
+//     link.href = url;
+//     link.download = "";
+//     document.body.appendChild(link);
+//     link.click();
+//     link.remove();
+//   } else {
+//     const text = await res.text();
+//     console.error("Non-JSON response:", text);
+//     throw new Error("Backend did not return JSON (check route or proxy)");
+//   }
+// };
+
+// export const downloadFile = async (id: string, name: string) => {
+//   const res = await fetch(`${API_BASE}/items/${id}/download`, {
+//     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+//   });
+
+//   if (!res.ok) {
+//     const text = await res.text();
+//     throw new Error(text || "Download failed");
+//   }
+
+//   const { url } = await res.json();
+
+//   const link = document.createElement("a");
+//   link.href = url;
+//   link.download = name; // ✅ ensures filename is respected
+//   document.body.appendChild(link);
+//   link.click();
+//   link.remove();
+// };
+
+export const downloadFile = async (id: string, name: string) => {
+  const token = getToken();
+  const res = await fetch(`${API_BASE}/items/${id}/download`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Download failed");
+  }
+
+  const { url } = await res.json();
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = name;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+};
+
