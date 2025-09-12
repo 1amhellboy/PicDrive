@@ -325,8 +325,8 @@ export const generateDownloadLink = async (fileId: string) => {
 
   const url = await getDownloadUrl(
     key,
-    file.name,                             // ✅ correct filename with extension
-    file.mimeType || "application/octet-stream" // ✅ fallback if missing
+    file.name,                             // correct filename with extension
+    file.mimeType || "application/octet-stream" // fallback if missing
   );
 
   return url;
