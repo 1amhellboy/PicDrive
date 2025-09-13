@@ -215,6 +215,125 @@
 
 // export default SharedWithMe
 
+// "use client"
+
+// import { useEffect, useState } from "react"
+// import FileCard from "../components/FileCard"
+// import FolderCard from "../components/FolderCard"
+// import { getSharedWithMe } from "../lib/item.service" // <-- API call
+
+// interface SharedWithMeProps {
+//   viewMode: "grid" | "list"
+// }
+
+// const SharedWithMe: React.FC<SharedWithMeProps> = ({ viewMode }) => {
+//   const [items, setItems] = useState<any[]>([])
+//   const [loading, setLoading] = useState(true)
+
+//   useEffect(() => {
+//     const fetchShared = async () => {
+//       try {
+//         const data = await getSharedWithMe()
+//         console.log("📩 Shared with me:", data)
+//         setItems(data)
+//       } catch (err: any) {
+//         alert(err.message || "Failed to fetch shared items")
+//       } finally {
+//         setLoading(false)
+//       }
+//     }
+
+//     fetchShared()
+//   }, [])
+
+//   if (loading) {
+//     return <div className="p-6 text-gray-500">Loading shared items...</div>
+//   }
+
+//   if (items.length === 0) {
+//     return (
+//       <div className="p-6 text-center text-gray-500">
+//         No files have been shared with you yet.
+//       </div>
+//     )
+//   }
+
+//   return (
+//     <div className="p-6 bg-white min-h-screen w-full">
+//       <div className="flex items-center justify-between mb-6">
+//         <div>
+//           <h1 className="text-2xl font-normal text-black">Shared with me</h1>
+//           <p className="text-sm text-gray-500 mt-1">{items.length} items</p>
+//         </div>
+//       </div>
+
+//       {viewMode === "list" ? (
+//         <div className="bg-white">
+//           <div className="flex items-center px-4 py-3 border-b border-gray-100 text-sm font-medium text-gray-600">
+//             <div className="flex-1">Name</div>
+//             <div className="w-32 text-left">Modified</div>
+//             <div className="w-20 text-left">Size</div>
+//             <div className="w-8"></div>
+//           </div>
+//           <div>
+//             {items.map((item) =>
+//               item.type === "folder" ? (
+//                 <FolderCard
+//                   key={item.id}
+//                   name={item.name}
+//                   itemCount={item.children?.length || 0}
+//                   modifiedDate={new Date(item.createdAt).toLocaleDateString()}
+//                   viewMode="list"
+//                   onClick={() => console.log(`Open shared folder: ${item.name}`)}
+//                 />
+//               ) : (
+//                 <FileCard
+//                   key={item.id}
+//                   id={item.id}
+//                   name={item.name}
+//                   type={item.type}
+//                   size={item.size ? `${(item.size / 1024).toFixed(1)} KB` : "-"}
+//                   modifiedDate={new Date(item.createdAt).toLocaleDateString()}
+//                   viewMode="list"
+//                   onClick={() => console.log(`Open shared file: ${item.name}`)}
+//                 />
+//               )
+//             )}
+//           </div>
+//         </div>
+//       ) : (
+//         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+//           {items.map((item) =>
+//             item.type === "folder" ? (
+//               <FolderCard
+//                 key={item.id}
+//                 name={item.name}
+//                 itemCount={item.children?.length || 0}
+//                 modifiedDate={new Date(item.createdAt).toLocaleDateString()}
+//                 viewMode="grid"
+//                 onClick={() => console.log(`Open shared folder: ${item.name}`)}
+//               />
+//             ) : (
+//               <FileCard
+//                 key={item.id}
+//                 id={item.id}
+//                 name={item.name}
+//                 type={item.type}
+//                 size={item.size ? `${(item.size / 1024).toFixed(1)} KB` : "-"}
+//                 modifiedDate={new Date(item.createdAt).toLocaleDateString()}
+//                 viewMode="grid"
+//                 onClick={() => console.log(`Open shared file: ${item.name}`)}
+//               />
+//             )
+//           )}
+//         </div>
+//       )}
+//     </div>
+//   )
+// }
+
+// export default SharedWithMe
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -245,6 +364,10 @@ const SharedWithMe: React.FC<SharedWithMeProps> = ({ viewMode }) => {
 
     fetchShared()
   }, [])
+
+  const handleTrashed = (id: string) => {
+    setItems((prev) => prev.filter((item) => item.id !== id))
+  }
 
   if (loading) {
     return <div className="p-6 text-gray-500">Loading shared items...</div>
@@ -296,6 +419,7 @@ const SharedWithMe: React.FC<SharedWithMeProps> = ({ viewMode }) => {
                   modifiedDate={new Date(item.createdAt).toLocaleDateString()}
                   viewMode="list"
                   onClick={() => console.log(`Open shared file: ${item.name}`)}
+                  onTrashed={() => handleTrashed(item.id)} // ✅ remove immediately
                 />
               )
             )}
@@ -323,6 +447,8 @@ const SharedWithMe: React.FC<SharedWithMeProps> = ({ viewMode }) => {
                 modifiedDate={new Date(item.createdAt).toLocaleDateString()}
                 viewMode="grid"
                 onClick={() => console.log(`Open shared file: ${item.name}`)}
+                onTrashed={() => handleTrashed(item.id)} // ✅ remove immediately
+                canRename={false}
               />
             )
           )}

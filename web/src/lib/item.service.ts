@@ -338,3 +338,15 @@ export const downloadFile = async (id: string, name: string) => {
   link.remove();
 };
 
+
+export const getRecentItems = async () => {
+  const token = localStorage.getItem("accessToken");
+  const res = await fetch(`${API_BASE}/items/recent`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to fetch recent items");
+  return data;
+};

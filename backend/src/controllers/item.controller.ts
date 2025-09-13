@@ -407,6 +407,49 @@ export const uploadFolder = async (req: Request, res: Response) => {
 //   }
 // };
 
+// export const getFileUrl = async (req: Request, res: Response) => {
+//   try {
+//     const { id } = req.params;
+//     const userId = req.user?.id;
+
+//     const item = await prisma.item.findUnique({ where: { id } });
+
+//     if (!item || !item.url) {
+//       return res.status(404).json({ error: "File not found" });
+//     }
+
+//     // ✅ Allow owner OR recipient of share OR public
+//     if (item.userId !== userId) {
+//       const share = await prisma.share.findFirst({
+//         where: {
+//           itemId: id,
+//           OR: [
+//             { sharedWith: userId },
+//             { isPublic: true },
+//           ],
+//         },
+//       });
+
+//       if (!share) {
+//         return res.status(403).json({ error: "Access denied" });
+//       }
+//     }
+
+//     // Extract the key from the saved URL
+//     const key = item.url.split("/").pop();
+//     if (!key) {
+//       return res.status(400).json({ error: "Invalid file URL in DB" });
+//     }
+
+//     const signedUrl = await getSignedFileUrl(key);
+//     res.json({ url: signedUrl });
+//   } catch (err: any) {
+//     console.error("getFileUrl error:", err);
+//     res.status(500).json({ error: err.message || "Failed to generate signed URL" });
+//   }
+// };
+
+
 export const getFileUrl = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -442,6 +485,18 @@ export const getFileUrl = async (req: Request, res: Response) => {
     }
 
     const signedUrl = await getSignedFileUrl(key);
+
+    // ✅ Log "open" activity for recents
+    if (userId) {
+      await prisma.activityLog.create({
+        data: {
+          userId,
+          itemId: item.id,
+          action: "open",
+        },
+      });
+    }
+
     res.json({ url: signedUrl });
   } catch (err: any) {
     console.error("getFileUrl error:", err);
@@ -538,5 +593,20 @@ export const getSharedWithMe = async (req: Request, res: Response): Promise<void
     res.status(200).json(sharedItems.map((share) => share.item));
   } catch (err: any) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+
+
+// item.controller.ts
+import { getRecentItems } from "../services/item.service";
+
+export const getRecentItemsController = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id!;
+    const items = await getRecentItems(userId);
+    res.json(items);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to fetch recent items" });
   }
 };

@@ -619,6 +619,7 @@ interface FileCardProps {
     | "spreadsheet"
     | "presentation"
   size: string
+  canRename?: boolean   // 👈 new
   modifiedDate: string
   thumbnail?: string
   fileUrl?: string
@@ -637,6 +638,7 @@ const FileCard: React.FC<FileCardProps> = ({
   fileUrl,
   onClick,
   onTrashed,
+  canRename = true,   // 👈 new
   viewMode = "grid",
 }) => {
   const [showMenu, setShowMenu] = useState(false)
@@ -902,13 +904,23 @@ const handleRename = async (newName: string) => {
                 <Download className="w-4 h-4 mr-2" />
                 Download
               </button>
-              <button
+              {/* <button
                 onClick={(e) => handleMenuClick(e, "rename")}
                 className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 flex items-center text-black"
               >
                 <Edit3 className="w-4 h-4 mr-2" />
                 Rename
-              </button>
+              </button> */}
+              {canRename && (
+                <button
+                  onClick={(e) => handleMenuClick(e, "rename")}
+                  className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 flex items-center text-black"
+                >
+                  <Edit3 className="w-4 h-4 mr-2" />
+                  Rename
+                </button>
+            )}
+
               <button
                 onClick={(e) => handleMenuClick(e, "delete")}
                 className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 flex items-center text-black"
@@ -922,12 +934,20 @@ const handleRename = async (newName: string) => {
       </div>
 
       {/* Rename Modal */}
+      {/* <RenameModal
+        isOpen={showRenameModal}
+        onClose={() => setShowRenameModal(false)}
+        currentName={fileName}
+        onRename={handleRename}
+      /> */}
+      {canRename && (
       <RenameModal
         isOpen={showRenameModal}
         onClose={() => setShowRenameModal(false)}
         currentName={fileName}
         onRename={handleRename}
-      />
+         />
+      )}
 
       {/* Share Modal */}
       <ShareModal

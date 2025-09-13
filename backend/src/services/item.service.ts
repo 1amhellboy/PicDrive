@@ -107,43 +107,97 @@ export const renameItem = async (itemId: string, name: string, userId: string) =
 };
 
 
+// export const deleteItem = async (itemId: string, userId: string) => {
+//   try {
+//     // 1. Find item (we need the URL before deleting)
+//     const item = await prisma.item.findUnique({
+//       where: { id: itemId },
+//     });
+
+//     if (!item || item.userId !== userId) {
+//       throw new Error("Item not found or unauthorized");
+//     }
+
+//     // 2. Delete activity logs linked to this item
+//     await prisma.activityLog.deleteMany({ where: { itemId } });
+
+//     // 3. Delete item from DB
+//     const result = await prisma.item.deleteMany({
+//       where: { id: itemId, userId },
+//     });
+
+//     if (result.count === 0) {
+//       throw new Error("Item not found or unauthorized");
+//     }
+
+//     // 4. If it's a file, delete from S3
+//     if (item.type === "file" && item.url) {
+//       try {
+//         const key = item.url.split("/").pop(); // extract key from URL
+//         if (key) {
+//           await deleteFileFromS3(key);
+//         }
+//       } catch (s3Error) {
+//         console.error("S3 deletion failed:", s3Error);
+//         // Don’t throw — DB deletion was already successful
+//       }
+//     }
+
+//     return result;
+//   } catch (error) {
+//     console.error("Error deleting item:", error);
+//     throw new Error("Failed to delete item");
+//   }
+// };
+
 export const deleteItem = async (itemId: string, userId: string) => {
   try {
-    // 1. Find item (we need the URL before deleting)
-    const item = await prisma.item.findUnique({
+    // 1. Try deleting an owned item
+    const owned = await prisma.item.findUnique({
       where: { id: itemId },
     });
 
-    if (!item || item.userId !== userId) {
-      throw new Error("Item not found or unauthorized");
+    if (owned && owned.userId === userId) {
+      // Delete activity logs
+      await prisma.activityLog.deleteMany({ where: { itemId } });
+
+      // Delete from DB
+      const result = await prisma.item.deleteMany({
+        where: { id: itemId, userId },
+      });
+
+      // Delete from S3 if it's a file
+      if (owned.type === "file" && owned.url) {
+        try {
+          const key = owned.url.split("/").pop();
+          if (key) await deleteFileFromS3(key);
+        } catch (s3Error) {
+          console.error("S3 deletion failed:", s3Error);
+        }
+      }
+
+      return { deleted: "owned", itemId };
     }
 
-    // 2. Delete activity logs linked to this item
-    await prisma.activityLog.deleteMany({ where: { itemId } });
-
-    // 3. Delete item from DB
-    const result = await prisma.item.deleteMany({
-      where: { id: itemId, userId },
+    // 2. If not owned, try deleting a shared item
+    const shared = await prisma.share.deleteMany({
+      where: { itemId, sharedWith: userId },
     });
 
-    if (result.count === 0) {
-      throw new Error("Item not found or unauthorized");
+    if (shared.count > 0) {
+      await prisma.activityLog.create({
+        data: {
+          userId,
+          itemId,
+          action: "delete",
+          details: "deleted shared item link",
+        },
+      });
+      return { deleted: "shared", itemId };
     }
 
-    // 4. If it's a file, delete from S3
-    if (item.type === "file" && item.url) {
-      try {
-        const key = item.url.split("/").pop(); // extract key from URL
-        if (key) {
-          await deleteFileFromS3(key);
-        }
-      } catch (s3Error) {
-        console.error("S3 deletion failed:", s3Error);
-        // Don’t throw — DB deletion was already successful
-      }
-    }
-
-    return result;
+    // 3. If neither worked → unauthorized
+    throw new Error("Item not found or unauthorized");
   } catch (error) {
     console.error("Error deleting item:", error);
     throw new Error("Failed to delete item");
@@ -232,28 +286,74 @@ export const handleFileUpload = async (file: Express.Multer.File) => {
 };
 
 
-// item.service.ts
+// // item.service.ts
+// export const moveToTrash = async (itemId: string, userId: string) => {
+//   try {
+//     const item = await prisma.item.updateMany({
+//       where: { id: itemId, userId },
+//       data: { isTrashed: true },
+//     });
+
+//     if (item.count === 0) {
+//       throw new Error("Item not found or unauthorized");
+//     }
+
+//     await prisma.activityLog.create({
+//       data: {
+//         userId,
+//         itemId,
+//         action: "move",
+//         details: "Moved to trash",
+//       },
+//     });
+
+//     return item;
+//   } catch (error) {
+//     console.error("Error moving item to trash:", error);
+//     throw new Error("Failed to move item to trash");
+//   }
+// };
+
 export const moveToTrash = async (itemId: string, userId: string) => {
   try {
+    // 1. Try to move if user owns the item
     const item = await prisma.item.updateMany({
       where: { id: itemId, userId },
       data: { isTrashed: true },
     });
 
-    if (item.count === 0) {
-      throw new Error("Item not found or unauthorized");
+    if (item.count > 0) {
+      await prisma.activityLog.create({
+        data: {
+          userId,
+          itemId,
+          action: "move",
+          details: "Moved to trash",
+        },
+      });
+      return { success: true, type: "item" };
     }
 
-    await prisma.activityLog.create({
-      data: {
-        userId,
-        itemId,
-        action: "move",
-        details: "Moved to trash",
-      },
+    // 2. If not owner, check if item is shared with user
+    const share = await prisma.share.updateMany({
+      where: { itemId, sharedWith: userId },
+      data: { isTrashed: true },
     });
 
-    return item;
+    if (share.count > 0) {
+      await prisma.activityLog.create({
+        data: {
+          userId,
+          itemId,
+          action: "move",
+          details: "Shared item moved to trash",
+        },
+      });
+      return { success: true, type: "share" };
+    }
+
+    // 3. Neither owner nor recipient
+    throw new Error("Item not found or unauthorized");
   } catch (error) {
     console.error("Error moving item to trash:", error);
     throw new Error("Failed to move item to trash");
@@ -261,18 +361,44 @@ export const moveToTrash = async (itemId: string, userId: string) => {
 };
 
 
+
 // Get all trashed items for a user
+// export const getTrashedItems = async (userId: string) => {
+//   try {
+//     return await prisma.item.findMany({
+//       where: {
+//         userId,
+//         isTrashed: true,
+//       },
+//       orderBy: {
+//         createdAt: "desc",
+//       },
+//     });
+//   } catch (error) {
+//     console.error("Error fetching trashed items:", error);
+//     throw new Error("Failed to fetch trashed items");
+//   }
+// };
+
 export const getTrashedItems = async (userId: string) => {
   try {
-    return await prisma.item.findMany({
-      where: {
-        userId,
-        isTrashed: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+    // 1. Items owned by the user that are trashed
+    const ownedItems = await prisma.item.findMany({
+      where: { userId, isTrashed: true },
+      orderBy: { createdAt: "desc" },
     });
+
+    // 2. Items shared with the user that are trashed
+    const sharedItems = await prisma.share.findMany({
+      where: { sharedWith: userId, isTrashed: true },
+      include: { item: true },
+    });
+
+    // Merge: return only the item details for shared ones
+    return [
+      ...ownedItems,
+      ...sharedItems.map((s) => s.item),
+    ];
   } catch (error) {
     console.error("Error fetching trashed items:", error);
     throw new Error("Failed to fetch trashed items");
@@ -280,33 +406,85 @@ export const getTrashedItems = async (userId: string) => {
 };
 
 
-
 // Restore an item (move back from trash)
+// export const restoreItem = async (itemId: string, userId: string) => {
+//   try {
+//     const result = await prisma.item.updateMany({
+//       where: {
+//         id: itemId,
+//         userId,
+//         isTrashed: true,   // ✅ only trashed items can be restored
+//       },
+//       data: { isTrashed: false },
+//     });
+
+//     if (result.count === 0) {
+//       throw new Error("Item not found or unauthorized");
+//     }
+
+//     await prisma.activityLog.create({
+//       data: {
+//         userId,
+//         itemId,
+//         action: "move",   // ✅ reuse move action
+//         details: "restored from trash",
+//       },
+//     });
+
+//     return result;
+//   } catch (error) {
+//     console.error("Error restoring item:", error);
+//     throw new Error("Failed to restore item");
+//   }
+// };
 export const restoreItem = async (itemId: string, userId: string) => {
   try {
-    const result = await prisma.item.updateMany({
+    // 1. Try restoring an owned item first
+    const owned = await prisma.item.updateMany({
       where: {
         id: itemId,
         userId,
-        isTrashed: true,   // ✅ only trashed items can be restored
+        isTrashed: true,
       },
       data: { isTrashed: false },
     });
 
-    if (result.count === 0) {
-      throw new Error("Item not found or unauthorized");
+    if (owned.count > 0) {
+      await prisma.activityLog.create({
+        data: {
+          userId,
+          itemId,
+          action: "move",
+          details: "restored from trash",
+        },
+      });
+      return { restored: "owned", itemId };
     }
 
-    await prisma.activityLog.create({
-      data: {
-        userId,
+    // 2. If not owned, try restoring a shared item
+    const shared = await prisma.share.updateMany({
+      where: {
         itemId,
-        action: "move",   // ✅ reuse move action
-        details: "restored from trash",
+        sharedWith: userId,
+        isTrashed: true,
       },
+      data: { isTrashed: false },
     });
 
-    return result;
+    if (shared.count > 0) {
+      await prisma.activityLog.create({
+        data: {
+          userId,
+          itemId,
+          action: "move",
+          details: "restored shared item from trash",
+        },
+      });
+      return { restored: "shared", itemId };
+    }
+
+    // 3. If nothing restored → error
+    throw new Error("Item not found in trash or unauthorized");
   } catch (error) {
     console.error("Error restoring item:", error);
     throw new Error("Failed to restore item");
@@ -371,7 +549,7 @@ export const getSharedWithUser = async (userId: string) => {
   return await prisma.share.findMany({
     where: {
       OR: [
-        { sharedWith: userId },   // explicitly shared
+        { sharedWith: userId, isTrashed:false },   // explicitly shared
         { isPublic: true },       // public shares
       ],
     },
@@ -379,4 +557,23 @@ export const getSharedWithUser = async (userId: string) => {
       item: true,
     },
   });
+};
+
+// item.service.ts
+export const getRecentItems = async (userId: string) => {
+  const activities = await prisma.activityLog.findMany({
+    where: {
+      userId,
+      action: { in: ["upload", "open"] },
+    },
+    orderBy: { timestamp: "desc" },
+    include: { item: true },
+    take: 10, // grab more, then filter unique
+  });
+
+  // Remove duplicates by itemId, keep latest
+  const unique = Array.from(new Map(activities.map(a => [a.itemId, a])).values());
+
+  // return last 4
+  return unique.slice(0, 4).map(a => a.item);
 };
