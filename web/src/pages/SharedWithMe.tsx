@@ -420,6 +420,7 @@ const SharedWithMe: React.FC<SharedWithMeProps> = ({ viewMode }) => {
                   viewMode="list"
                   onClick={() => console.log(`Open shared file: ${item.name}`)}
                   onTrashed={() => handleTrashed(item.id)} // ✅ remove immediately
+                  canStar={false}
                 />
               )
             )}
@@ -449,6 +450,7 @@ const SharedWithMe: React.FC<SharedWithMeProps> = ({ viewMode }) => {
                 onClick={() => console.log(`Open shared file: ${item.name}`)}
                 onTrashed={() => handleTrashed(item.id)} // ✅ remove immediately
                 canRename={false}
+                canStar={false}
               />
             )
           )}

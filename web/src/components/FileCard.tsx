@@ -1024,6 +1024,7 @@ interface FileCardProps {
   onTrashed?: () => void
   canRename?: boolean
   onStarToggled?: (newStarred: boolean) => void // <-- add this line
+  canStar : boolean,
 }
 
 const FileCard: React.FC<FileCardProps> = ({
@@ -1040,6 +1041,7 @@ const FileCard: React.FC<FileCardProps> = ({
   isStarred = false,   // ⭐ default false
   onStarToggled,       // ⭐ new prop
   viewMode = "grid",
+  canStar = true,
 }) => {
   const [showMenu, setShowMenu] = useState(false)
   const [showRenameModal, setShowRenameModal] = useState(false)
@@ -1223,7 +1225,7 @@ const FileCard: React.FC<FileCardProps> = ({
                 <Trash2 className="w-4 h-4 mr-2" />
                 Move to trash
               </button>
-              <button
+              {/* <button
                 onClick={(e) => handleMenuClick(e, "star")}
                 className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 flex items-center text-black"
               >
@@ -1233,7 +1235,21 @@ const FileCard: React.FC<FileCardProps> = ({
                   <StarOff className="w-4 h-4 mr-2" />
                 )}
                 {starred ? "Unstar" : "Star"}
-              </button>
+              </button> */}
+              {canStar && (
+                <button
+                  onClick={(e) => handleMenuClick(e, "star")}
+                  className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 flex items-center text-black"
+                >
+                  {starred ? (
+                  <Star className="w-4 h-4 mr-2 text-yellow-500" />
+                ) : (
+                  <StarOff className="w-4 h-4 mr-2" />
+                )}
+                  {starred ? "Unstar" : "Star"}
+                </button>
+              )}
+
             </div>
           )}
         </div>
