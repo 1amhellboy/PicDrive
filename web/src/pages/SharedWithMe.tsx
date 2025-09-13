@@ -349,6 +349,18 @@ const SharedWithMe: React.FC<SharedWithMeProps> = ({ viewMode }) => {
   const [items, setItems] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
+const mapMimeToType = (mimeType?: string) => {
+  if (!mimeType) return "other" as const;
+  if (mimeType.startsWith("image/")) return "image" as const;
+  if (mimeType.startsWith("video/")) return "video" as const;
+  if (mimeType.startsWith("audio/")) return "audio" as const;
+  if (mimeType === "application/pdf" || mimeType.includes("msword")) return "document" as const;
+  if (mimeType.includes("spreadsheet") || mimeType.includes("excel")) return "spreadsheet" as const;
+  if (mimeType.includes("presentation") || mimeType.includes("powerpoint")) return "presentation" as const;
+  if (mimeType === "application/zip" || mimeType.includes("tar") || mimeType.includes("gzip")) return "archive" as const;
+  return "other" as const;
+};
+
   useEffect(() => {
     const fetchShared = async () => {
       try {
@@ -414,7 +426,8 @@ const SharedWithMe: React.FC<SharedWithMeProps> = ({ viewMode }) => {
                   key={item.id}
                   id={item.id}
                   name={item.name}
-                  type={item.type}
+                  // type={item.type}
+                  type={mapMimeToType(item.mimeType)}
                   size={item.size ? `${(item.size / 1024).toFixed(1)} KB` : "-"}
                   modifiedDate={new Date(item.createdAt).toLocaleDateString()}
                   viewMode="list"
@@ -443,7 +456,8 @@ const SharedWithMe: React.FC<SharedWithMeProps> = ({ viewMode }) => {
                 key={item.id}
                 id={item.id}
                 name={item.name}
-                type={item.type}
+                // type={item.type}
+                type={mapMimeToType(item.mimeType)}
                 size={item.size ? `${(item.size / 1024).toFixed(1)} KB` : "-"}
                 modifiedDate={new Date(item.createdAt).toLocaleDateString()}
                 viewMode="grid"
