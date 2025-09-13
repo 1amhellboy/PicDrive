@@ -1851,9 +1851,9 @@ const FileCard: React.FC<FileCardProps> = ({
           className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 flex items-center text-black"
         >
           {starred ? (
-            <Star className="w-4 h-4 mr-2 text-yellow-500" />
+            <Star className="w-4 h-4 mr-2 text-gray-500" />
           ) : (
-            <StarOff className="w-4 h-4 mr-2" />
+            <StarOff className="w-4 h-4 mr-2 text-gray-500" />
           )}
           {starred ? "Unstar" : "Star"}
         </button>

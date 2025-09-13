@@ -4,20 +4,20 @@ import './index.css';
 import App from './App';
 import { logout } from "./lib/auth";
 
-// //  Store original fetch
-// const originalFetch = window.fetch;
+//  Store original fetch
+const originalFetch = window.fetch;
 
-// //  Override fetch
-// window.fetch = async (...args) => {
-//   const response = await originalFetch(...args);
+//  Override fetch
+window.fetch = async (...args) => {
+  const response = await originalFetch(...args);
 
-//   if (response.status === 401) {
-//     console.warn("Token expired or unauthorized → logging out");
-//     logout();
-//   }
+  if (response.status === 401) {
+    console.warn("Token expired or unauthorized → logging out");
+    logout();
+  }
 
-//   return response;
-// };
+  return response;
+};
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
