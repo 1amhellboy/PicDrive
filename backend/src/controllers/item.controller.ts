@@ -1,4 +1,4 @@
-import {createItem, deleteItem, getItemsByParent, renameItem, createShare, getShared, handleFileUpload, moveToTrash, getTrashedItems, restoreItem, emptyTrash, createFolder, generateDownloadLink, getSharedWithUser} from '../services/item.service';
+import {createItem, deleteItem, getItemsByParent, renameItem, createShare, getShared, handleFileUpload, moveToTrash, getTrashedItems, restoreItem, emptyTrash, createFolder, generateDownloadLink, getSharedWithUser, getStarredItems, toggleStar} from '../services/item.service';
 import {Request, Response} from 'express';
 import { deleteFileFromS3, getSignedFileUrl } from '../utils/s3';
 import { userInfo } from 'os';
@@ -608,5 +608,35 @@ export const getRecentItemsController = async (req: Request, res: Response) => {
     res.json(items);
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to fetch recent items" });
+  }
+};
+
+
+
+// controllers/item.controller.ts
+export const starItem = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const updated = await toggleStar(id, userId);
+    res.json(updated);
+  } catch (err: any) {
+    console.error("starItem error:", err);
+    res.status(500).json({ error: err.message || "Failed to star item" });
+  }
+};
+
+export const getStarred = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const items = await getStarredItems(userId);
+    res.json(items);
+  } catch (err: any) {
+    console.error("getStarred error:", err);
+    res.status(500).json({ error: err.message || "Failed to fetch starred items" });
   }
 };

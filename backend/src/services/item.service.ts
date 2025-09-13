@@ -577,3 +577,43 @@ export const getRecentItems = async (userId: string) => {
   // return last 4
   return unique.slice(0, 4).map(a => a.item);
 };
+
+
+// services/item.service.ts
+
+//  Toggle star
+export const toggleStar = async (itemId: string, userId: string) => {
+  const item = await prisma.item.findFirst({
+    where: { id: itemId, userId },
+  });
+
+  if (!item) throw new Error("Item not found or unauthorized");
+
+  const updated = await prisma.item.update({
+    where: { id: itemId },
+    data: { isStarred: !item.isStarred },
+  });
+
+  await prisma.activityLog.create({
+    data: {
+      userId,
+      itemId,
+      action: "star",
+      details: updated.isStarred ? "Starred" : "Unstarred",
+    },
+  });
+
+  return updated;
+};
+
+//  Get starred items
+export const getStarredItems = async (userId: string) => {
+  return prisma.item.findMany({
+    where: {
+      userId,
+      isStarred: true,
+      isTrashed: false,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+};

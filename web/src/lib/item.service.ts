@@ -11,6 +11,7 @@ export type Item = {
   parentId?: string | null;
   createdAt: string;
   updatedAt: string;
+  isStarred?: boolean;
 };
 
 // Helper to get token
@@ -348,5 +349,37 @@ export const getRecentItems = async () => {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to fetch recent items");
+  return data;
+};
+
+
+
+
+// item.service.ts
+
+//  Toggle star
+export const toggleStar = async (id: string) => {
+  const token = localStorage.getItem("accessToken");
+  const res = await fetch(`${API_BASE}/items/${id}/star`, {
+    method: "PATCH",
+    headers: { Authorization: token ? `Bearer ${token}` : "" },
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to toggle star");
+
+  return data;
+};
+
+//  Get starred items
+export const getStarredItems = async () => {
+  const token = localStorage.getItem("accessToken");
+  const res = await fetch(`${API_BASE}/items/starred/me`, {
+    headers: { Authorization: token ? `Bearer ${token}` : "" },
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to fetch starred items");
+
   return data;
 };

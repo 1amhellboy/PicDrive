@@ -97,6 +97,7 @@ const mapMimeToType = (mimeType?: string) => {
                 modifiedDate={formatRelativeDate(file.createdAt)}
                 viewMode="list"
                 onClick={() => console.log(`Open file: ${file.name}`)}
+                isStarred={file.isStarred} 
                 
               />
             ))}
@@ -128,6 +129,7 @@ const mapMimeToType = (mimeType?: string) => {
               viewMode="grid"
               onClick={() => console.log(`Open file: ${file.name}`)}
               onTrashed={() => setItems((prev) => prev.filter((i) => i.id !== file.id))}
+              isStarred={file.isStarred} 
             />
           ))}
         </div>
