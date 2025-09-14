@@ -172,7 +172,114 @@
 
 // export default Recent;
 
+// "use client";
+// import { useEffect, useState } from "react";
+// import FileCard from "../components/FileCard";
+// import FolderCard from "../components/FolderCard";
+// import { getRecentItems } from "../lib/item.service";
+
+// interface RecentProps {
+//   viewMode: "grid" | "list";
+// }
+
+// const Recent: React.FC<RecentProps> = ({ viewMode }) => {
+//   const [items, setItems] = useState<any[]>([]);
+//   const [loading, setLoading] = useState(true);
+
+
+// const mapMimeToType = (mimeType?: string) => {
+//   if (!mimeType) return "other" as const;
+//   if (mimeType.startsWith("image/")) return "image" as const;
+//   if (mimeType.startsWith("video/")) return "video" as const;
+//   if (mimeType.startsWith("audio/")) return "audio" as const;
+//   if (mimeType === "application/pdf" || mimeType.includes("msword")) return "document" as const;
+//   if (mimeType.includes("spreadsheet") || mimeType.includes("excel")) return "spreadsheet" as const;
+//   if (mimeType.includes("presentation") || mimeType.includes("powerpoint")) return "presentation" as const;
+//   if (mimeType === "application/zip" || mimeType.includes("tar") || mimeType.includes("gzip")) return "archive" as const;
+//   return "other" as const;
+// };
+
+//   useEffect(() => {
+//     const fetchRecent = async () => {
+//       try {
+//         const data = await getRecentItems();
+//         setItems(data);
+//       } catch (err: any) {
+//         alert(err.message || "Failed to fetch recent items");
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+//     fetchRecent();
+//   }, []);
+
+//   if (loading) return <div className="p-6">Loading...</div>;
+//   if (items.length === 0)
+//     return <div className="p-6 text-gray-500">No recent items</div>;
+
+//   return (
+//     <div className="p-6 bg-white min-h-screen w-full">
+//       <h1 className="text-2xl font-normal text-black mb-6">Recent</h1>
+//       {viewMode === "list" ? (
+//         <div>
+//           {items.map((item) =>
+//             item.type === "folder" ? (
+//               <FolderCard
+//                 key={item.id}
+//                 name={item.name}
+//                 itemCount={0}
+//                 modifiedDate={new Date(item.createdAt).toLocaleDateString()}
+//                 viewMode="list"
+//               />
+//             ) : (
+//               <FileCard
+//                 key={item.id}
+//                 id={item.id}
+//                 name={item.name}
+//                 // type={item.type}
+//                 type={mapMimeToType(item.mimeType)}
+//                 size={item.size ? `${(item.size / 1024).toFixed(1)} KB` : "-"}
+//                 modifiedDate={new Date(item.createdAt).toLocaleDateString()}
+//                 viewMode="list"
+//               />
+//             )
+//           )}
+//         </div>
+//       ) : (
+//         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+//           {items.map((item) =>
+//             item.type === "folder" ? (
+//               <FolderCard
+//                 key={item.id}
+//                 name={item.name}
+//                 itemCount={0}
+//                 modifiedDate={new Date(item.createdAt).toLocaleDateString()}
+//                 viewMode="grid"
+//               />
+//             ) : (
+//               <FileCard
+//                 key={item.id}
+//                 id={item.id}
+//                 name={item.name}
+//                 // type={item.type}
+//                 type={mapMimeToType(item.mimeType)}
+//                 size={item.size ? `${(item.size / 1024).toFixed(1)} KB` : "-"}
+//                 modifiedDate={new Date(item.createdAt).toLocaleDateString()}
+//                 viewMode="grid"
+//               />
+//             )
+//           )}
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default Recent;
+
+
 "use client";
+
 import { useEffect, useState } from "react";
 import FileCard from "../components/FileCard";
 import FolderCard from "../components/FolderCard";
@@ -186,18 +293,25 @@ const Recent: React.FC<RecentProps> = ({ viewMode }) => {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-
-const mapMimeToType = (mimeType?: string) => {
-  if (!mimeType) return "other" as const;
-  if (mimeType.startsWith("image/")) return "image" as const;
-  if (mimeType.startsWith("video/")) return "video" as const;
-  if (mimeType.startsWith("audio/")) return "audio" as const;
-  if (mimeType === "application/pdf" || mimeType.includes("msword")) return "document" as const;
-  if (mimeType.includes("spreadsheet") || mimeType.includes("excel")) return "spreadsheet" as const;
-  if (mimeType.includes("presentation") || mimeType.includes("powerpoint")) return "presentation" as const;
-  if (mimeType === "application/zip" || mimeType.includes("tar") || mimeType.includes("gzip")) return "archive" as const;
-  return "other" as const;
-};
+  const mapMimeToType = (mimeType?: string) => {
+    if (!mimeType) return "other" as const;
+    if (mimeType.startsWith("image/")) return "image" as const;
+    if (mimeType.startsWith("video/")) return "video" as const;
+    if (mimeType.startsWith("audio/")) return "audio" as const;
+    if (mimeType === "application/pdf" || mimeType.includes("msword"))
+      return "document" as const;
+    if (mimeType.includes("spreadsheet") || mimeType.includes("excel"))
+      return "spreadsheet" as const;
+    if (mimeType.includes("presentation") || mimeType.includes("powerpoint"))
+      return "presentation" as const;
+    if (
+      mimeType === "application/zip" ||
+      mimeType.includes("tar") ||
+      mimeType.includes("gzip")
+    )
+      return "archive" as const;
+    return "other" as const;
+  };
 
   useEffect(() => {
     const fetchRecent = async () => {
@@ -213,37 +327,55 @@ const mapMimeToType = (mimeType?: string) => {
     fetchRecent();
   }, []);
 
-  if (loading) return <div className="p-6">Loading...</div>;
+  if (loading)
+    return (
+      <div className="p-6 text-gray-500 dark:text-gray-400">Loading...</div>
+    );
+
   if (items.length === 0)
-    return <div className="p-6 text-gray-500">No recent items</div>;
+    return (
+      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+        No recent items
+      </div>
+    );
 
   return (
-    <div className="p-6 bg-white min-h-screen w-full">
-      <h1 className="text-2xl font-normal text-black mb-6">Recent</h1>
+    <div className="p-6 bg-white dark:bg-gray-900 min-h-screen w-full">
+      <h1 className="text-2xl font-normal text-black dark:text-white mb-6">
+        Recent
+      </h1>
+
       {viewMode === "list" ? (
-        <div>
-          {items.map((item) =>
-            item.type === "folder" ? (
-              <FolderCard
-                key={item.id}
-                name={item.name}
-                itemCount={0}
-                modifiedDate={new Date(item.createdAt).toLocaleDateString()}
-                viewMode="list"
-              />
-            ) : (
-              <FileCard
-                key={item.id}
-                id={item.id}
-                name={item.name}
-                // type={item.type}
-                type={mapMimeToType(item.mimeType)}
-                size={item.size ? `${(item.size / 1024).toFixed(1)} KB` : "-"}
-                modifiedDate={new Date(item.createdAt).toLocaleDateString()}
-                viewMode="list"
-              />
-            )
-          )}
+        <div className="bg-white dark:bg-gray-800 rounded-lg">
+          <div className="flex items-center px-4 py-3 border-b border-gray-100 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300">
+            <div className="flex-1">Name</div>
+            <div className="w-32 text-left">Modified</div>
+            <div className="w-20 text-left">Size</div>
+            <div className="w-8"></div>
+          </div>
+          <div>
+            {items.map((item) =>
+              item.type === "folder" ? (
+                <FolderCard
+                  key={item.id}
+                  name={item.name}
+                  itemCount={0}
+                  modifiedDate={new Date(item.createdAt).toLocaleDateString()}
+                  viewMode="list"
+                />
+              ) : (
+                <FileCard
+                  key={item.id}
+                  id={item.id}
+                  name={item.name}
+                  type={mapMimeToType(item.mimeType)}
+                  size={item.size ? `${(item.size / 1024).toFixed(1)} KB` : "-"}
+                  modifiedDate={new Date(item.createdAt).toLocaleDateString()}
+                  viewMode="list"
+                />
+              )
+            )}
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -261,7 +393,6 @@ const mapMimeToType = (mimeType?: string) => {
                 key={item.id}
                 id={item.id}
                 name={item.name}
-                // type={item.type}
                 type={mapMimeToType(item.mimeType)}
                 size={item.size ? `${(item.size / 1024).toFixed(1)} KB` : "-"}
                 modifiedDate={new Date(item.createdAt).toLocaleDateString()}

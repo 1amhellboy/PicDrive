@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import Sidebar from "../components/Sidebar"
 import Topbar from "../components/Topbar"
 import MyDrive from "./MyDrive"
@@ -16,6 +16,11 @@ import Profile from "./Profile"
 export default function PicDrivePage() {
   const [currentPage, setCurrentPage] = useState("mydrive")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+  // Load saved theme from localStorage on first load
+  const saved = localStorage.getItem("theme")
+  return saved === "dark"
+})
 
   const handleNavigation = (page: string) => setCurrentPage(page)
   const handleUploadClick = () => setCurrentPage("upload")
@@ -41,7 +46,8 @@ export default function PicDrivePage() {
       case "newfolder":
         return <NewFolder />
       case "settings":
-        return <Settings />
+        // return <Settings />
+        return <Settings darkMode={darkMode} setDarkMode={setDarkMode} />
       case "profile":
         return <Profile />
       default:
@@ -49,8 +55,27 @@ export default function PicDrivePage() {
     }
   }
 
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark")
+      localStorage.setItem("theme", "dark")
+    } else {
+      document.documentElement.classList.remove("dark")
+      localStorage.setItem("theme", "light")
+    }
+  }, [darkMode])
+
+  // restore on load
+  // useEffect(() => {
+  //   const stored = localStorage.getItem("theme")
+  //   if (stored === "dark") setDarkMode(true)
+  // }, [])
+
+
   return (
-    <div className="h-screen flex bg-gray-50 w-full">
+    // <div className="h-screen flex bg-gray-50 w-full">
+    <div className="h-screen flex bg-gray-50 dark:bg-gray-900 text-black dark:text-white w-full">
       {/* Sidebar */}
       <Sidebar activeItem={currentPage} onItemClick={handleNavigation} />
 
@@ -67,7 +92,8 @@ export default function PicDrivePage() {
         />
 
         {/* Page Content */}
-        <main className="flex-1 h-full w-full bg-gray-50 overflow-hidden">
+        {/* <main className="flex-1 h-full w-full bg-gray-50 overflow-hidden"> */}
+        <main className="flex-1 h-full w-full bg-gray-50 dark:bg-gray-900 dark:text-white overflow-hidden">
           <div className="h-full w-full overflow-y-auto">
             {renderCurrentPage()}
           </div>

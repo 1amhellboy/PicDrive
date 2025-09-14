@@ -118,72 +118,232 @@
 
 // export default Starred
 
-"use client"
+// "use client"
 
-import { useEffect, useState } from "react"
-import FileCard from "../components/FileCard"
-import FolderCard from "../components/FolderCard"
-import { getStarredItems } from "../lib/item.service"  
+// import { useEffect, useState } from "react"
+// import FileCard from "../components/FileCard"
+// import FolderCard from "../components/FolderCard"
+// import { getStarredItems } from "../lib/item.service"  
+
+// interface StarredProps {
+//   viewMode: "grid" | "list"
+// }
+
+// const Starred: React.FC<StarredProps> = ({ viewMode }) => {
+//   const [items, setItems] = useState<any[]>([])
+//   const [loading, setLoading] = useState(true)
+
+
+// const mapMimeToType = (mimeType?: string) => {
+//   if (!mimeType) return "other" as const;
+//   if (mimeType.startsWith("image/")) return "image" as const;
+//   if (mimeType.startsWith("video/")) return "video" as const;
+//   if (mimeType.startsWith("audio/")) return "audio" as const;
+//   if (mimeType === "application/pdf" || mimeType.includes("msword")) return "document" as const;
+//   if (mimeType.includes("spreadsheet") || mimeType.includes("excel")) return "spreadsheet" as const;
+//   if (mimeType.includes("presentation") || mimeType.includes("powerpoint")) return "presentation" as const;
+//   if (mimeType === "application/zip" || mimeType.includes("tar") || mimeType.includes("gzip")) return "archive" as const;
+//   return "other" as const;
+// };
+
+//   useEffect(() => {
+//     const fetchStarred = async () => {
+//       try {
+//         const data = await getStarredItems()
+//         setItems(data)
+//       } catch (err: any) {
+//         alert(err.message || "Failed to fetch starred items")
+//       } finally {
+//         setLoading(false)
+//       }
+//     }
+//     fetchStarred()
+//   }, [])
+
+//   if (loading) {
+//     return <div className="p-6 text-gray-500">Loading starred items...</div>
+//   }
+
+//   if (items.length === 0) {
+//     return (
+//       <div className="p-6 text-center text-gray-500">
+//         No starred files or folders yet.
+//       </div>
+//     )
+//   }
+
+//   return (
+//     <div className="p-6 bg-white min-h-screen w-full">
+//       <div className="flex items-center justify-between mb-6">
+//         <div>
+//           <h1 className="text-2xl font-normal text-black">Starred</h1>
+//           <p className="text-sm text-gray-500 mt-1">{items.length} items</p>
+//         </div>
+//       </div>
+
+//       {viewMode === "list" ? (
+//         <div className="bg-white">
+//           <div className="flex items-center px-4 py-3 border-b border-gray-100 text-sm font-medium text-gray-600">
+//             <div className="flex-1">Name</div>
+//             <div className="w-32 text-left">Modified</div>
+//             <div className="w-20 text-left">Size</div>
+//             <div className="w-8"></div>
+//           </div>
+//           <div>
+//             {items.map((item) =>
+//               item.type === "folder" ? (
+//                 <FolderCard
+//                   key={item.id}
+//                   name={item.name}
+//                   itemCount={item.children?.length || 0}
+//                   modifiedDate={new Date(item.createdAt).toLocaleDateString()}
+//                   viewMode="list"
+//                   onClick={() => console.log(`Open starred folder: ${item.name}`)}
+//                 />
+//               ) : (
+//                 <FileCard
+//                   key={item.id}
+//                   id={item.id}
+//                   name={item.name}
+//                   // type={item.type}
+//                   type={mapMimeToType(item.mimeType)}
+//                   size={item.size ? `${(item.size / 1024).toFixed(1)} KB` : "-"}
+//                   modifiedDate={new Date(item.createdAt).toLocaleDateString()}
+//                   viewMode="list"
+//                   isStarred={true}   //  always starred
+//                   onClick={() => console.log(`Open starred file: ${item.name}`)}
+//                   onStarToggled={(newStarred:boolean) => {
+//                     if (!newStarred) {
+//                       setItems((prev) => prev.filter((i) => i.id !== item.id))
+//                     }
+//                   }}
+//                 />
+//               )
+//             )}
+//           </div>
+//         </div>
+//       ) : (
+//         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+//           {items.map((item) =>
+//             item.type === "folder" ? (
+//               <FolderCard
+//                 key={item.id}
+//                 name={item.name}
+//                 itemCount={item.children?.length || 0}
+//                 modifiedDate={new Date(item.createdAt).toLocaleDateString()}
+//                 viewMode="grid"
+//                 onClick={() => console.log(`Open starred folder: ${item.name}`)}
+//               />
+//             ) : (
+//               <FileCard
+//                 key={item.id}
+//                 id={item.id}
+//                 name={item.name}
+//                 // type={item.type}
+//                 type={mapMimeToType(item.mimeType)}
+//                 size={item.size ? `${(item.size / 1024).toFixed(1)} KB` : "-"}
+//                 modifiedDate={new Date(item.createdAt).toLocaleDateString()}
+//                 viewMode="grid"
+//                 isStarred={true}   //  always starred
+//                 onClick={() => console.log(`Open starred file: ${item.name}`)}
+//                     onStarToggled={(newStarred:boolean) => {
+//                     if (!newStarred) {
+//                       setItems((prev) => prev.filter((i) => i.id !== item.id))
+//                     }
+//                   }}
+//               />
+//             )
+//           )}
+//         </div>
+//       )}
+//     </div>
+//   )
+// }
+
+// export default Starred
+
+
+"use client";
+
+import { useEffect, useState } from "react";
+import FileCard from "../components/FileCard";
+import FolderCard from "../components/FolderCard";
+import { getStarredItems } from "../lib/item.service";
 
 interface StarredProps {
-  viewMode: "grid" | "list"
+  viewMode: "grid" | "list";
 }
 
 const Starred: React.FC<StarredProps> = ({ viewMode }) => {
-  const [items, setItems] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-
-const mapMimeToType = (mimeType?: string) => {
-  if (!mimeType) return "other" as const;
-  if (mimeType.startsWith("image/")) return "image" as const;
-  if (mimeType.startsWith("video/")) return "video" as const;
-  if (mimeType.startsWith("audio/")) return "audio" as const;
-  if (mimeType === "application/pdf" || mimeType.includes("msword")) return "document" as const;
-  if (mimeType.includes("spreadsheet") || mimeType.includes("excel")) return "spreadsheet" as const;
-  if (mimeType.includes("presentation") || mimeType.includes("powerpoint")) return "presentation" as const;
-  if (mimeType === "application/zip" || mimeType.includes("tar") || mimeType.includes("gzip")) return "archive" as const;
-  return "other" as const;
-};
+  const mapMimeToType = (mimeType?: string) => {
+    if (!mimeType) return "other" as const;
+    if (mimeType.startsWith("image/")) return "image" as const;
+    if (mimeType.startsWith("video/")) return "video" as const;
+    if (mimeType.startsWith("audio/")) return "audio" as const;
+    if (mimeType === "application/pdf" || mimeType.includes("msword"))
+      return "document" as const;
+    if (mimeType.includes("spreadsheet") || mimeType.includes("excel"))
+      return "spreadsheet" as const;
+    if (mimeType.includes("presentation") || mimeType.includes("powerpoint"))
+      return "presentation" as const;
+    if (
+      mimeType === "application/zip" ||
+      mimeType.includes("tar") ||
+      mimeType.includes("gzip")
+    )
+      return "archive" as const;
+    return "other" as const;
+  };
 
   useEffect(() => {
     const fetchStarred = async () => {
       try {
-        const data = await getStarredItems()
-        setItems(data)
+        const data = await getStarredItems();
+        setItems(data);
       } catch (err: any) {
-        alert(err.message || "Failed to fetch starred items")
+        alert(err.message || "Failed to fetch starred items");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchStarred()
-  }, [])
+    };
+    fetchStarred();
+  }, []);
 
   if (loading) {
-    return <div className="p-6 text-gray-500">Loading starred items...</div>
+    return (
+      <div className="p-6 text-gray-500 dark:text-gray-400">
+        Loading starred items...
+      </div>
+    );
   }
 
   if (items.length === 0) {
     return (
-      <div className="p-6 text-center text-gray-500">
+      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
         No starred files or folders yet.
       </div>
-    )
+    );
   }
 
   return (
-    <div className="p-6 bg-white min-h-screen w-full">
+    <div className="p-6 bg-white dark:bg-gray-900 min-h-screen w-full">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-normal text-black">Starred</h1>
-          <p className="text-sm text-gray-500 mt-1">{items.length} items</p>
+          <h1 className="text-2xl font-normal text-black dark:text-white">
+            Starred
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {items.length} items
+          </p>
         </div>
       </div>
 
       {viewMode === "list" ? (
-        <div className="bg-white">
-          <div className="flex items-center px-4 py-3 border-b border-gray-100 text-sm font-medium text-gray-600">
+        <div className="bg-white dark:bg-gray-800 rounded-lg">
+          <div className="flex items-center px-4 py-3 border-b border-gray-100 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300">
             <div className="flex-1">Name</div>
             <div className="w-32 text-left">Modified</div>
             <div className="w-20 text-left">Size</div>
@@ -198,23 +358,28 @@ const mapMimeToType = (mimeType?: string) => {
                   itemCount={item.children?.length || 0}
                   modifiedDate={new Date(item.createdAt).toLocaleDateString()}
                   viewMode="list"
-                  onClick={() => console.log(`Open starred folder: ${item.name}`)}
+                  onClick={() =>
+                    console.log(`Open starred folder: ${item.name}`)
+                  }
                 />
               ) : (
                 <FileCard
                   key={item.id}
                   id={item.id}
                   name={item.name}
-                  // type={item.type}
                   type={mapMimeToType(item.mimeType)}
                   size={item.size ? `${(item.size / 1024).toFixed(1)} KB` : "-"}
                   modifiedDate={new Date(item.createdAt).toLocaleDateString()}
                   viewMode="list"
-                  isStarred={true}   //  always starred
-                  onClick={() => console.log(`Open starred file: ${item.name}`)}
-                  onStarToggled={(newStarred:boolean) => {
+                  isStarred={true} // always starred
+                  onClick={() =>
+                    console.log(`Open starred file: ${item.name}`)
+                  }
+                  onStarToggled={(newStarred: boolean) => {
                     if (!newStarred) {
-                      setItems((prev) => prev.filter((i) => i.id !== item.id))
+                      setItems((prev) =>
+                        prev.filter((i) => i.id !== item.id)
+                      );
                     }
                   }}
                 />
@@ -232,32 +397,35 @@ const mapMimeToType = (mimeType?: string) => {
                 itemCount={item.children?.length || 0}
                 modifiedDate={new Date(item.createdAt).toLocaleDateString()}
                 viewMode="grid"
-                onClick={() => console.log(`Open starred folder: ${item.name}`)}
+                onClick={() =>
+                  console.log(`Open starred folder: ${item.name}`)
+                }
               />
             ) : (
               <FileCard
                 key={item.id}
                 id={item.id}
                 name={item.name}
-                // type={item.type}
                 type={mapMimeToType(item.mimeType)}
                 size={item.size ? `${(item.size / 1024).toFixed(1)} KB` : "-"}
                 modifiedDate={new Date(item.createdAt).toLocaleDateString()}
                 viewMode="grid"
-                isStarred={true}   //  always starred
-                onClick={() => console.log(`Open starred file: ${item.name}`)}
-                    onStarToggled={(newStarred:boolean) => {
-                    if (!newStarred) {
-                      setItems((prev) => prev.filter((i) => i.id !== item.id))
-                    }
-                  }}
+                isStarred={true} // always starred
+                onClick={() =>
+                  console.log(`Open starred file: ${item.name}`)
+                }
+                onStarToggled={(newStarred: boolean) => {
+                  if (!newStarred) {
+                    setItems((prev) => prev.filter((i) => i.id !== item.id));
+                  }
+                }}
               />
             )
           )}
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Starred
+export default Starred;

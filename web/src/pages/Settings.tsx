@@ -158,13 +158,15 @@ import React, { useEffect, useState } from "react"
 import { HardDrive, Moon, Sun, Bell, Shield, Download } from "lucide-react"
 import { getStorageUsage, StorageUsage, requestDataExport } from "../lib/item.service"
 
-const Settings: React.FC = () => {
-  const [darkMode, setDarkMode] = useState(false)
+interface SettingsProps {
+  darkMode: boolean
+  setDarkMode: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
   const [notifications, setNotifications] = useState(true)
   const [autoSync, setAutoSync] = useState(true)
-  // const [loading, setLoading] = useState(false)
-const [message, setMessage] = useState<string | null>(null)
-
+  const [message, setMessage] = useState<string | null>(null)
 
   // 🔑 new state for storage usage
   const [usage, setUsage] = useState<StorageUsage | null>(null)
@@ -199,14 +201,14 @@ const [message, setMessage] = useState<string | null>(null)
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">Settings</h1>
+      <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Settings</h1>
 
       <div className="max-w-2xl space-y-6">
         {/* Storage Usage */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="bg-white dark:bg-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
           <div className="flex items-center mb-4">
             <HardDrive className="w-5 h-5 text-gray-500 mr-3" />
-            <h2 className="text-lg font-medium text-gray-900">Storage Usage</h2>
+            <h2 className="text-lg font-medium">Storage Usage</h2>
           </div>
 
           {loading ? (
@@ -240,21 +242,21 @@ const [message, setMessage] = useState<string | null>(null)
         </div>
 
         {/* Appearance */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="bg-white dark:bg-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
           <div className="flex items-center mb-4">
             {darkMode ? (
               <Moon className="w-5 h-5 text-gray-500 mr-3" />
             ) : (
               <Sun className="w-5 h-5 text-gray-500 mr-3" />
             )}
-            <h2 className="text-lg font-medium text-gray-900">Appearance</h2>
+            <h2 className="text-lg font-medium">Appearance</h2>
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900">Dark Mode</p>
-              <p className="text-sm text-gray-500">Switch to dark theme</p>
+              <p className="text-sm font-medium mb-1">Dark Mode</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Switch to dark theme</p>
             </div>
-            <button
+            {/* <button
               onClick={() => setDarkMode(!darkMode)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                 darkMode ? "bg-blue-600" : "bg-gray-200"
@@ -265,26 +267,39 @@ const [message, setMessage] = useState<string | null>(null)
                   darkMode ? "translate-x-6" : "translate-x-1"
                 }`}
               />
-            </button>
+            </button> */}
+            <button
+  onClick={() => setDarkMode(!darkMode)}
+  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+    darkMode ? "bg-blue-600" : "bg-gray-200"
+  }`}
+>
+  <span
+    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+      darkMode ? "translate-x-6" : "translate-x-1"
+    }`}
+  />
+</button>
           </div>
         </div>
 
         {/* Notifications */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        {/* Notifications */}
+        <div className="bg-white dark:bg-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
           <div className="flex items-center mb-4">
             <Bell className="w-5 h-5 text-gray-500 mr-3" />
-            <h2 className="text-lg font-medium text-gray-900">Notifications</h2>
+            <h2 className="text-lg font-medium text-gray-900 dark:text-white">Notifications</h2>
           </div>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900">Push Notifications</p>
-                <p className="text-sm text-gray-500">Get notified about file changes</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">Push Notifications</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Get notified about file changes</p>
               </div>
               <button
                 onClick={() => setNotifications(!notifications)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  notifications ? "bg-blue-600" : "bg-gray-200"
+                  notifications ? "bg-blue-600" : "bg-gray-200 dark:bg-gray-600"
                 }`}
               >
                 <span
@@ -296,13 +311,13 @@ const [message, setMessage] = useState<string | null>(null)
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900">Auto Sync</p>
-                <p className="text-sm text-gray-500">Automatically sync files across devices</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">Auto Sync</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Automatically sync files across devices</p>
               </div>
               <button
                 onClick={() => setAutoSync(!autoSync)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  autoSync ? "bg-blue-600" : "bg-gray-200"
+                  autoSync ? "bg-blue-600" : "bg-gray-200 dark:bg-gray-600"
                 }`}
               >
                 <span
@@ -316,86 +331,63 @@ const [message, setMessage] = useState<string | null>(null)
         </div>
 
         {/* Privacy & Security */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="bg-white dark:bg-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
           <div className="flex items-center mb-4">
             <Shield className="w-5 h-5 text-gray-500 mr-3" />
-            <h2 className="text-lg font-medium text-gray-900">Privacy & Security</h2>
+            <h2 className="text-lg font-medium text-gray-900 dark:text-white">Privacy & Security</h2>
           </div>
           <div className="space-y-3">
-            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
               Change Password
             </button>
-            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
               Two-Factor Authentication
             </button>
-            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
               Privacy Settings
             </button>
           </div>
         </div>
 
         {/* Data Export */}
-        {/* <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="bg-white dark:bg-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
           <div className="flex items-center mb-4">
             <Download className="w-5 h-5 text-gray-500 mr-3" />
-            <h2 className="text-lg font-medium text-gray-900">Data Export</h2>
+            <h2 className="text-lg font-medium text-gray-900 dark:text-white">Data Export</h2>
           </div>
-          <p className="text-sm text-gray-600 mb-4">Download a copy of all your data stored in PicDrive</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Download a copy of all your data stored in PicDrive
+          </p>
+
           <button
-  onClick={async () => {
-    try {
-      await requestDataExport()
-    } catch (err: any) {
-      alert(err.message || "Export failed")
-    }
-  }}
-  className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-blue-600 hover:text-white transition-colors"
->
-  Request Data Export
-</button>
+            onClick={async () => {
+              setLoading(true)
+              try {
+                await requestDataExport()
+                setMessage("Export started! Check your downloads.")
+              } catch (err: any) {
+                setMessage(err.message || "Export failed")
+              } finally {
+                setLoading(false)
+              }
+            }}
+            disabled={loading}
+            className={`px-4 py-2 text-sm rounded-lg transition-colors ${
+              loading
+                ? "bg-gray-200 dark:bg-gray-600 text-gray-500 cursor-not-allowed"
+                : "border bg-blue-50 dark:bg-blue-600 dark:text-white border-gray-300 text-gray-700 hover:bg-blue-600 hover:text-white"
+            }`}
+          >
+            {loading ? "Exporting..." : "Request Data Export"}
+          </button>
+
+          {message && (
+            <p className={`mt-2 text-sm ${message.includes("Export") ? "text-green-600" : "text-red-600"}`}>
+              {message}
+            </p>
+          )}
         </div>
-      </div> */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-  <div className="flex items-center mb-4">
-    <Download className="w-5 h-5 text-gray-500 mr-3" />
-    <h2 className="text-lg font-medium text-gray-900">Data Export</h2>
-  </div>
-  <p className="text-sm text-gray-600 mb-4">
-    Download a copy of all your data stored in PicDrive
-  </p>
 
-  <button
-    onClick={async () => {
-      setLoading(true)
-      try {
-        await requestDataExport()
-        setMessage(" Export started! Check your downloads.")
-      } catch (err: any) {
-        setMessage(` ${err.message || "Export failed"}`)
-      } finally {
-        setLoading(false)
-      }
-    }}
-    disabled={loading}
-    className={`px-4 py-2 text-sm rounded-lg transition-colors ${
-      loading
-        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-        : "border bg-blue-50 border-gray-300 text-gray-700 hover:bg-blue-600 hover:text-white"
-    }`}
-  >
-    {loading ? "Exporting..." : "Request Data Export"}
-  </button>
-
-  {message && (
-    <p
-      className={`mt-2 text-sm ${
-        message.startsWith("") ? "text-green-600" : "text-red-600"
-      }`}
-    >
-      {message}
-    </p>
-  )}
-</div>
       </div>
     </div>
   )
