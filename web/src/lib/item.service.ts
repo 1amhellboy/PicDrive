@@ -407,3 +407,66 @@ export const getStorageUsage = async (): Promise<StorageUsage> => {
 
   return data;
 };
+
+
+
+// export const requestDataExport = async () => {
+//   const token = getToken()
+
+//   const res = await fetch(`${API_BASE}/items/export`, {
+//     method: "GET",
+//     headers: {
+//       Authorization: token ? `Bearer ${token}` : "",
+//     },
+//   })
+
+//   if (!res.ok) {
+//     const errorText = await res.text()
+//     throw new Error(errorText || "Failed to export data")
+//   }
+
+//   //  Convert response stream to Blob
+//   const blob = await res.blob()
+//   const url = window.URL.createObjectURL(blob)
+
+//   //  Trigger download
+//   const link = document.createElement("a")
+//   link.href = url
+//   link.download = "data-export.zip"
+//   document.body.appendChild(link)
+//   link.click()
+//   link.remove()
+
+//   //  Cleanup URL after some time
+//   setTimeout(() => window.URL.revokeObjectURL(url), 1000)
+// }
+
+export const requestDataExport = async (): Promise<boolean> => {
+  const token = localStorage.getItem("accessToken")
+
+  const res = await fetch(`${API_BASE}/items/export`, {
+    method: "GET",
+    headers: {
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+  })
+
+  if (!res.ok) {
+    const errorText = await res.text()
+    throw new Error(errorText || "Failed to export data")
+  }
+
+  const blob = await res.blob()
+  const url = window.URL.createObjectURL(blob)
+
+  const link = document.createElement("a")
+  link.href = url
+  link.download = "data-export.zip"
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+
+  setTimeout(() => window.URL.revokeObjectURL(url), 1000)
+
+  return true // ✅ signal success
+}

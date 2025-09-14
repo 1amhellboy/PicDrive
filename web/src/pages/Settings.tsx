@@ -156,12 +156,15 @@
 
 import React, { useEffect, useState } from "react"
 import { HardDrive, Moon, Sun, Bell, Shield, Download } from "lucide-react"
-import { getStorageUsage, StorageUsage } from "../lib/item.service"
+import { getStorageUsage, StorageUsage, requestDataExport } from "../lib/item.service"
 
 const Settings: React.FC = () => {
   const [darkMode, setDarkMode] = useState(false)
   const [notifications, setNotifications] = useState(true)
   const [autoSync, setAutoSync] = useState(true)
+  // const [loading, setLoading] = useState(false)
+const [message, setMessage] = useState<string | null>(null)
+
 
   // 🔑 new state for storage usage
   const [usage, setUsage] = useState<StorageUsage | null>(null)
@@ -332,16 +335,67 @@ const Settings: React.FC = () => {
         </div>
 
         {/* Data Export */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        {/* <div className="bg-white border border-gray-200 rounded-lg p-6">
           <div className="flex items-center mb-4">
             <Download className="w-5 h-5 text-gray-500 mr-3" />
             <h2 className="text-lg font-medium text-gray-900">Data Export</h2>
           </div>
           <p className="text-sm text-gray-600 mb-4">Download a copy of all your data stored in PicDrive</p>
-          <button className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-            Request Data Export
-          </button>
+          <button
+  onClick={async () => {
+    try {
+      await requestDataExport()
+    } catch (err: any) {
+      alert(err.message || "Export failed")
+    }
+  }}
+  className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-blue-600 hover:text-white transition-colors"
+>
+  Request Data Export
+</button>
         </div>
+      </div> */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+  <div className="flex items-center mb-4">
+    <Download className="w-5 h-5 text-gray-500 mr-3" />
+    <h2 className="text-lg font-medium text-gray-900">Data Export</h2>
+  </div>
+  <p className="text-sm text-gray-600 mb-4">
+    Download a copy of all your data stored in PicDrive
+  </p>
+
+  <button
+    onClick={async () => {
+      setLoading(true)
+      try {
+        await requestDataExport()
+        setMessage(" Export started! Check your downloads.")
+      } catch (err: any) {
+        setMessage(` ${err.message || "Export failed"}`)
+      } finally {
+        setLoading(false)
+      }
+    }}
+    disabled={loading}
+    className={`px-4 py-2 text-sm rounded-lg transition-colors ${
+      loading
+        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+        : "border bg-blue-50 border-gray-300 text-gray-700 hover:bg-blue-600 hover:text-white"
+    }`}
+  >
+    {loading ? "Exporting..." : "Request Data Export"}
+  </button>
+
+  {message && (
+    <p
+      className={`mt-2 text-sm ${
+        message.startsWith("") ? "text-green-600" : "text-red-600"
+      }`}
+    >
+      {message}
+    </p>
+  )}
+</div>
       </div>
     </div>
   )

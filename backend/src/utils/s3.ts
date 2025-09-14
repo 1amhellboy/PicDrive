@@ -95,3 +95,15 @@ export const getS3KeyFromUrl = (url: string) => {
     return url;
   }
 }
+
+
+
+export const getS3ObjectStream = async (key: string) => {
+  const command = new GetObjectCommand({
+    Bucket: process.env.AWS_BUCKET_NAME!,
+    Key: key,
+  })
+
+  const response = await s3.send(command)
+  return response.Body || null
+}

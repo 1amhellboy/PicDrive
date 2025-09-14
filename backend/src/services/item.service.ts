@@ -1,5 +1,7 @@
 import { PrismaClient,Permission } from '../generated/prisma';
-import { uploadFileToS3,deleteFileFromS3,getDownloadUrl,getS3KeyFromUrl } from '../utils/s3';
+import { uploadFileToS3,deleteFileFromS3,getDownloadUrl,getS3KeyFromUrl,getS3ObjectStream } from '../utils/s3';
+import { Response } from "express";
+import archiver from "archiver";
 
 const prisma = new PrismaClient();
 
@@ -653,4 +655,44 @@ export const getUserStorageUsage = async(userId:string)=>{
     videos,
   }
    
+}
+
+
+
+export const exportUserData = async (userId: string, res: Response) => {
+  // 1️ Fetch all user’s files
+  const items = await prisma.item.findMany({
+    where: { userId, type: "file", isTrashed: false },
+  })
+
+  if (!items.length) {
+    res.status(404).json({ error: "No files to export" })
+    return
+  }
+
+  // 2️ Setup ZIP stream
+  res.setHeader("Content-Type", "application/zip")
+  res.setHeader("Content-Disposition", "attachment; filename=data-export.zip")
+
+  const archive = archiver("zip", { zlib: { level: 9 } })
+  archive.pipe(res)
+
+  // 3️ Append each file to archive
+  for (const item of items) {
+    if (!item.url) continue
+
+    const key = item.url.split("/").pop()
+    if (!key) continue
+
+    try {
+      const stream = await getS3ObjectStream(key)
+      if (stream) {
+        archive.append(stream as any, { name: item.name })
+      }
+    } catch (err) {
+      console.error(`Failed to fetch ${item.name}:`, err)
+    }
+  }
+
+  await archive.finalize()
 }

@@ -1,4 +1,4 @@
-import {createItem, deleteItem, getItemsByParent, renameItem, createShare, getShared, handleFileUpload, moveToTrash, getTrashedItems, restoreItem, emptyTrash, createFolder, generateDownloadLink, getSharedWithUser, getStarredItems, toggleStar, getUserStorageUsage} from '../services/item.service';
+import {createItem, deleteItem, getItemsByParent, renameItem, createShare, getShared, handleFileUpload, moveToTrash, getTrashedItems, restoreItem, emptyTrash, createFolder, generateDownloadLink, getSharedWithUser, getStarredItems, toggleStar, getUserStorageUsage, exportUserData} from '../services/item.service';
 import {Request, Response} from 'express';
 import { deleteFileFromS3, getSignedFileUrl } from '../utils/s3';
 import { userInfo } from 'os';
@@ -652,5 +652,19 @@ export const getStoreageUsage = async (req: Request, res: Response) => {
   } catch (err: any) {
     console.error("getStorageUser error:", err);
     res.status(500).json({ error: err.message || "Failed to fetch user storage usage" });
+  }
+}
+
+export const requestDataExport = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" })
+    }
+
+    await exportUserData(userId, res)
+  } catch (err: any) {
+    console.error("Data export error:", err)
+    res.status(500).json({ error: "Failed to export user data" })
   }
 }
