@@ -617,3 +617,40 @@ export const getStarredItems = async (userId: string) => {
     orderBy: { createdAt: "desc" },
   });
 };
+
+
+export const getUserStorageUsage = async(userId:string)=>{
+  const items = await prisma.item.findMany({
+    where:{userId,type:'file',isTrashed:false},
+    select:{size:true,mimeType:true},
+  })
+
+  const totalUsed = items.reduce((sum,f)=> sum +(f.size || 0),0)
+
+  let documents = 0,
+    photos = 0,
+    videos = 0
+
+
+  items.forEach((f)=>{
+    if(!f.mimeType) return;
+    if(f.mimeType.startsWith('image/')){
+      photos += f.size || 0
+    } else if(f.mimeType.startsWith('video/')){
+      videos += f.size || 0
+    } else{
+      documents += f.size || 0
+    }
+  })
+
+  const total = 15 * 1024 * 1024 * 1024 // 15GB
+
+  return {
+    total,
+    used:totalUsed,
+    documents,
+    photos,
+    videos,
+  }
+   
+}

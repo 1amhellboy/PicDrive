@@ -1,5 +1,5 @@
 import express from "express";
-import { create, getByParent, rename, remove, shareItem, accessSharedItem, uploadFile, trashItem, getTrash, restore, clearTrash,uploadFolder, getFileUrl,downloadFile, sharedItem, getSharedWithMe,getRecentItemsController, getStarred, starItem } from '../controllers/item.controller';
+import { create, getByParent, rename, remove, shareItem, accessSharedItem, uploadFile, trashItem, getTrash, restore, clearTrash,uploadFolder, getFileUrl,downloadFile, sharedItem, getSharedWithMe,getRecentItemsController, getStarred, starItem, getStoreageUsage } from '../controllers/item.controller';
 import { authenticate } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate";
 import { CreateItemSchema,RenameItemSchema,DeleteItemSchema,ShareItemSchema,GetItemsSchema } from "../validators/item.schema";
@@ -12,6 +12,7 @@ const router = express.Router();
 router.patch("/:id/star", authenticate, starItem);
 router.get("/starred/me", authenticate, getStarred);
 router.get("/recent", authenticate, getRecentItemsController);
+router.get("/storage", authenticate, getStoreageUsage)
 router.post('/', authenticate,validate(CreateItemSchema), create);
 router.get("/:id/download", authenticate ,downloadFile);
 router.patch("/:id/restore", authenticate, restore);

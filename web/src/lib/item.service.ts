@@ -383,3 +383,27 @@ export const getStarredItems = async () => {
 
   return data;
 };
+
+
+export interface StorageUsage {
+  used: number
+  total: number
+  documents: number
+  photos: number
+  videos: number
+}
+
+export const getStorageUsage = async (): Promise<StorageUsage> => {
+  const token = localStorage.getItem("accessToken");
+  const res = await fetch(`${API_BASE}/items/storage`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to fetch storage usage");
+
+  return data;
+};
