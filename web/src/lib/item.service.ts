@@ -468,5 +468,54 @@ export const requestDataExport = async (): Promise<boolean> => {
 
   setTimeout(() => window.URL.revokeObjectURL(url), 1000)
 
-  return true // ✅ signal success
+  return true //  signal success
+}
+
+
+// Profile Update
+export async function updateProfile(data: { name: string; email: string }) {
+  const token = localStorage.getItem("accessToken");
+  try {
+    const res = await fetch(`${API_BASE}/items/update`, {
+      method: "PUT",
+      
+      headers: {
+        "Content-Type": "application/json",
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+      body: JSON.stringify(data),
+    })
+
+    if (!res.ok) {
+      const error = await res.json()
+      throw new Error(error.message || "Failed to update profile")
+    }
+
+    return await res.json()
+  } catch (err: any) {
+    throw new Error(err.message || "Update request failed")
+  }
+}
+
+// Account Statistics
+export async function getAccountStats() {
+  const token = localStorage.getItem("accessToken");
+  try {
+    const res = await fetch(`${API_BASE}/items/stats`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+    })
+
+    if (!res.ok) {
+      const error = await res.json()
+      throw new Error(error.message || "Failed to fetch account stats")
+    }
+
+    return await res.json()
+  } catch (err: any) {
+    throw new Error(err.message || "Stats request failed")
+  }
 }

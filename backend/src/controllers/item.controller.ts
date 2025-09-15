@@ -6,7 +6,7 @@ import multer from 'multer';
 import { ItemType } from '../generated/prisma';
 import { PrismaClient } from '../generated/prisma';
 const prisma = new PrismaClient();
-
+import * as userService from "../services/item.service"
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -533,7 +533,7 @@ export const downloadFile = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "File not found" });
     }
 
-    // ✅ Allow owner OR recipient of share OR public
+    //  Allow owner OR recipient of share OR public
     if (item.userId !== userId) {
       const share = await prisma.share.findFirst({
         where: {
@@ -666,5 +666,43 @@ export const requestDataExport = async (req: Request, res: Response) => {
   } catch (err: any) {
     console.error("Data export error:", err)
     res.status(500).json({ error: "Failed to export user data" })
+  }
+}
+
+
+export async function updateProfile(req: Request, res: Response) {
+  try {
+    const userId = req.user?.id //  from authMiddleware
+    const { name, email } = req.body
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" })
+    }
+
+    if (!name || !email) {
+      return res.status(400).json({ message: "Name and email are required" })
+    }
+
+    const updatedUser = await userService.updateProfile(userId, { name, email })
+    return res.json(updatedUser)
+  } catch (error: any) {
+    console.error("Update Profile Error:", error.message)
+    res.status(500).json({ message: error.message || "Failed to update profile" })
+  }
+}
+
+export async function getAccountStats(req: Request, res: Response) {
+  try {
+    const userId = req.user?.id
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" })
+    }
+
+    const stats = await userService.getAccountStats(userId)
+    return res.json(stats)
+  } catch (error: any) {
+    console.error("Get Stats Error:", error.message)
+    res.status(500).json({ message: error.message || "Failed to fetch account stats" })
   }
 }

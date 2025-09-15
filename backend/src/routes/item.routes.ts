@@ -1,5 +1,5 @@
 import express from "express";
-import { create, getByParent, rename, remove, shareItem, accessSharedItem, uploadFile, trashItem, getTrash, restore, clearTrash,uploadFolder, getFileUrl,downloadFile, sharedItem, getSharedWithMe,getRecentItemsController, getStarred, starItem, getStoreageUsage,requestDataExport } from '../controllers/item.controller';
+import { create, getByParent, rename, remove, shareItem, accessSharedItem, uploadFile, trashItem, getTrash, restore, clearTrash,uploadFolder, getFileUrl,downloadFile, sharedItem, getSharedWithMe,getRecentItemsController, getStarred, starItem, getStoreageUsage,requestDataExport,updateProfile,getAccountStats } from '../controllers/item.controller';
 import { authenticate } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate";
 import { CreateItemSchema,RenameItemSchema,DeleteItemSchema,ShareItemSchema,GetItemsSchema } from "../validators/item.schema";
@@ -7,6 +7,12 @@ import { upload } from '../middlewares/upload.middleware';
 
 const router = express.Router();
 
+
+// ✅ Update user profile
+router.put("/update", authenticate, updateProfile)
+
+// ✅ Get account stats
+router.get("/stats", authenticate, getAccountStats)
 
 router.get("/export", authenticate, requestDataExport)
 router.patch("/:id/star", authenticate, starItem);

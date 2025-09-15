@@ -696,3 +696,78 @@ export const exportUserData = async (userId: string, res: Response) => {
 
   await archive.finalize()
 }
+
+
+
+export async function updateProfile(
+  userId: string,
+  data: { name: string; email: string }
+) {
+  return prisma.user.update({
+    where: { id: userId },
+    data: {
+      name: data.name,
+      email: data.email,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      createdAt: true,
+    },
+  })
+}
+
+function formatStorage(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(2)} MB`
+  return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} GB`
+}
+
+//  Get account stats
+// export async function getAccountStats(userId: string) {
+//   // Count files uploaded by this user
+//   const filesUploaded = await prisma.item.count({
+//     where: { userId, type: "file" },
+//   })
+
+//   // Sum storage used by this user
+//   const storageUsedBytes = await prisma.item.aggregate({
+//     where: { userId, type: "file" },
+//     _sum: { size: true },
+//   })
+
+//   // Count files this user has shared
+//   const sharedFiles = await prisma.share.count({
+//     where: { sharedWith: userId },
+//   })
+
+//   return {
+//     filesUploaded,
+//     // storageUsed: `${((storageUsedBytes._sum.size || 0) / (1024 * 1024 * 1024)).toFixed(2)} GB`,
+//     storageUsed: formatStorage(bytes), // ✅ auto formatted
+//     sharedFiles,
+//   }
+// }
+
+export async function getAccountStats(userId: string) {
+  // Count files uploaded by this user
+  const filesUploaded = await prisma.item.count({
+    where: { userId, type: "file" },
+  })
+
+  //  Reuse storage calculation
+  const storageUsage = await getUserStorageUsage(userId)
+
+  // Count files this user has shared
+  const sharedFiles = await prisma.share.count({
+    where: { sharedWith: userId }, //  use correct field (sharedById)
+  })
+
+  return {
+    filesUploaded,
+    storageUsed: formatStorage(storageUsage.used), //  use formatted bytes
+    sharedFiles,
+  }
+}
