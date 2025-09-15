@@ -13,6 +13,7 @@ import NewFolder from "./NewFolder"
 import Settings from "./Settings"
 import Profile from "./Profile"
 
+
 export default function PicDrivePage() {
   const [currentPage, setCurrentPage] = useState("mydrive")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
@@ -74,6 +75,7 @@ export default function PicDrivePage() {
 
 
   return (
+    
     // <div className="h-screen flex bg-gray-50 w-full">
     <div className="h-screen flex bg-gray-50 dark:bg-gray-900 text-black dark:text-white w-full">
       {/* Sidebar */}

@@ -645,7 +645,7 @@ export const getUserStorageUsage = async(userId:string)=>{
     }
   })
 
-  const total = 15 * 1024 * 1024 * 1024 // 15GB
+  const total = 1 * 1024 * 1024 * 1024 // 1GB
 
   return {
     total,
