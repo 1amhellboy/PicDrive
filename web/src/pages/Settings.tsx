@@ -449,7 +449,7 @@
 import React, { useEffect, useState } from "react"
 import { HardDrive, Moon, Sun, Bell, Shield, Download, TestTube } from "lucide-react"
 import { getStorageUsage, StorageUsage, requestDataExport } from "../lib/item.service"
-import { useToast } from "../context/ToastContext" // ✅ v0 toast
+import { useToast } from "../context/ToastContext" 
 
 interface SettingsProps {
   darkMode: boolean
@@ -462,7 +462,21 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
   const [usage, setUsage] = useState<StorageUsage | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const { addToast } = useToast() // ✅ use v0 toast system
+    
+  const [pushEnabled, setPushEnabled] = useState<boolean>(() => {
+    const saved = localStorage.getItem("pushEnabled")
+    return saved ? JSON.parse(saved) : true
+  })
+
+    useEffect(() => {
+    localStorage.setItem("pushEnabled", JSON.stringify(pushEnabled))
+  }, [pushEnabled])
+
+  
+
+
+
+  const { addToast } = useToast() 
 
   useEffect(() => {
     const fetchUsage = async () => {
@@ -488,31 +502,6 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
       i++
     }
     return `${size.toFixed(1)} ${units[i]}`
-  }
-
-  // ✅ Demo toast functions
-  const showSuccessToast = () => {
-    addToast({
-      type: "success",
-      title: "File Renamed",
-      description: "document.pdf was renamed successfully",
-    })
-  }
-
-  const showErrorToast = () => {
-    addToast({
-      type: "error",
-      title: "Upload Failed",
-      description: "Could not upload image.jpg - file too large",
-    })
-  }
-
-  const showInfoToast = () => {
-    addToast({
-      type: "info",
-      title: "Sync Complete",
-      description: "5 files have been synchronized across devices",
-    })
   }
 
   return (
@@ -586,13 +575,33 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
           </div>
         </div>
 
-        {/* Notifications */}
+        {/* Notifications Section */}
         <div className="bg-white dark:bg-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
           <div className="flex items-center mb-4">
             <Bell className="w-5 h-5 text-gray-500 mr-3" />
-            <h2 className="text-lg font-medium">Notifications</h2>
+            <h2 className="text-lg font-medium text-gray-900 dark:text-white">Notifications</h2>
           </div>
           <div className="space-y-4">
+            {/* Push Notifications Toggle */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">Push Notifications</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Get notified about file changes</p>
+              </div>
+              <button
+                onClick={() => setPushEnabled(!pushEnabled)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  pushEnabled ? "bg-blue-600" : "bg-gray-200 dark:bg-gray-600"
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    pushEnabled ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-white">Auto Sync</p>
@@ -601,47 +610,17 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               <button
                 onClick={() => setAutoSync(!autoSync)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  autoSync ? "bg-blue-600" : "bg-gray-200 dark:bg-gray-600"
-                }`}
+                autoSync ? "bg-blue-600" : "bg-gray-200 dark:bg-gray-600"
+              }`}
               >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    autoSync ? "translate-x-6" : "translate-x-1"
-                  }`}
-                />
-              </button>
-            </div>
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                autoSync ? "translate-x-6" : "translate-x-1"
+              }`}
+              />
+            </button>
           </div>
-        </div>
 
-        {/* ✅ Toast Demo */}
-        <div className="bg-white dark:bg-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-          <div className="flex items-center mb-4">
-            <TestTube className="w-5 h-5 text-gray-500 mr-3" />
-            <h2 className="text-lg font-medium">Toast Notifications Demo</h2>
-          </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            Test the different types of toast notifications
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={showSuccessToast}
-              className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              Success Toast
-            </button>
-            <button
-              onClick={showErrorToast}
-              className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Error Toast
-            </button>
-            <button
-              onClick={showInfoToast}
-              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Info Toast
-            </button>
           </div>
         </div>
 
