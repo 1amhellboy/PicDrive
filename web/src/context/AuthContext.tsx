@@ -8,6 +8,8 @@ import {
   refreshAccessToken,
 } from "../lib/api";
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
+
 // ---------- Types ----------
 interface User {
   id: string;
@@ -88,8 +90,8 @@ const logout = async () => {
     await requestPasswordReset(email);
   };
 
-  const resetPwd = async (resetToken: string, newPassword: string, email?: string) => {
-    await resetPassword(resetToken, newPassword, email);
+  const resetPwd = async (token: string, newPassword: string, email?: string) => {
+    await resetPassword(token, newPassword, email);
   };
 
   // ---------- Refresh Token ----------
@@ -126,3 +128,5 @@ export const useAuth = () => {
   if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
   return ctx;
 };
+
+

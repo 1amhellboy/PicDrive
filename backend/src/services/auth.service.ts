@@ -64,7 +64,7 @@ export const handlePasswordResetRequest = async (email: string) => {
     }
   });
 
-  const resetLink = `http://localhost:3000/reset-password?token=${resetToken}&email=${email}`;
+  const resetLink = `http://localhost:5173/reset-password?token=${resetToken}&email=${email}`;
   sendResetEmail(email, resetLink);
 };
 
