@@ -522,7 +522,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Used</span>
                 <span className="font-medium">
-                  {formatSize(usage.used)} of {formatSize(usage.total)}
+                  {formatSize(usage.used)} of 15 GB
                 </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">

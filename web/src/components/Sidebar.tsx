@@ -159,7 +159,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeItem, onItemClick }) => {
       <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
         <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">Storage</div>
         <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
-          <span>{total}</span>
+          <span>15 GB</span>
         </div>
         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
           <div
@@ -168,7 +168,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeItem, onItemClick }) => {
           ></div>
         </div>
         <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-          {used} of {total} used
+          {used} of 15 GB used
         </div>
         <button className="flex items-center text-sm text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">
           <div className="w-4 h-4 border border-gray-400 dark:border-gray-600 rounded mr-2"></div>

@@ -1208,7 +1208,7 @@ const Trash: React.FC<TrashProps> = ({ viewMode }) => {
           e.stopPropagation()
           handleRestore(id, name)
         }}
-        className="flex items-center px-2 py-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors mt-2 mr-12"
+        className="flex items-center px-2 py-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors mt-2 mr-7"
       >
         <RotateCcw className="w-3 h-3 mr-1" />
         Restore
@@ -1220,7 +1220,7 @@ const Trash: React.FC<TrashProps> = ({ viewMode }) => {
         }}
         className="flex items-center px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors mt-2 "
       >
-        <Trash2 className="w-3 h-3 mr-1" />
+        <Trash2 className="w-3 h-3 " />
         Delete
       </button>
     </div>
