@@ -644,7 +644,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
         </div>
 
         {/* Data Export */}
-        <div className="bg-white dark:bg-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+        {/* <div className="bg-white dark:bg-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
           <div className="flex items-center mb-4">
             <Download className="w-5 h-5 text-gray-500 mr-3" />
             <h2 className="text-lg font-medium text-gray-900 dark:text-white">Data Export</h2>
@@ -680,7 +680,110 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               {message}
             </p>
           )}
-        </div>
+        </div> */}
+        {/* Data Export */}
+<div className="bg-white dark:bg-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+  <div className="flex items-center mb-4">
+    <Download className="w-5 h-5 text-gray-500 mr-3" />
+    <h2 className="text-lg font-medium text-gray-900 dark:text-white">Data Export</h2>
+  </div>
+  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+    Download a copy of all your data stored in PicDrive
+  </p>
+
+  {/* <button
+    onClick={async () => {
+      setLoading(true)
+      try {
+        await requestDataExport()
+
+        addToast({
+          type: "success",
+          title: "Export Started",
+          description: "Your data export has been initiated. Check downloads shortly.",
+        })
+      } catch (err: any) {
+        addToast({
+          type: "error",
+          title: "Export Failed",
+          description: err.message || "Unable to export your data right now.",
+        })
+      } finally {
+        setLoading(false)
+      }
+    }}
+    disabled={loading}
+    className={`px-4 py-2 text-sm rounded-lg transition-colors ${
+      loading
+        ? "bg-gray-200 dark:bg-gray-600 text-gray-500 cursor-not-allowed"
+        : "border bg-blue-50 dark:bg-blue-600 dark:text-white border-gray-300 text-gray-700 hover:bg-blue-600 hover:text-white"
+    }`}
+  >
+    {loading ? "Exporting..." : "Request Data Export"}
+  </button> */}
+  <button
+  onClick={async () => {
+    setLoading(true)
+
+    //  Stage 1: Notify that export started
+    addToast({
+      type: "info",
+      title: "Export Started",
+      description: "Your data export has been initiated...",
+    })
+
+    try {
+      const token = localStorage.getItem("accessToken")
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/items/export`, {
+        method: "GET",
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+      })
+
+      if (!res.ok) {
+        throw new Error("Failed to export data")
+      }
+
+      //  Convert response stream into a downloadable file
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = "picdrive-data-export.zip"
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+
+      //  Stage 2: Success toast
+      addToast({
+        type: "success",
+        title: "Export Successful",
+        description: "Your data has been downloaded successfully.",
+      })
+    } catch (err: any) {
+      //  Stage 3: Failure toast
+      addToast({
+        type: "error",
+        title: "Export Failed",
+        description: err.message || "Unable to export your data.",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }}
+  disabled={loading}
+  className={`px-4 py-2 text-sm rounded-lg transition-colors ${
+    loading
+      ? "bg-gray-200 dark:bg-gray-600 text-gray-500 cursor-not-allowed"
+      : "border bg-blue-50 dark:bg-blue-600 dark:text-white border-gray-300 text-gray-700 hover:bg-blue-600 hover:text-white"
+  }`}
+>
+  {loading ? "Exporting..." : "Request Data Export"}
+</button>
+</div>
+
       </div>
     </div>
   )

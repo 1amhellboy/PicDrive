@@ -70,6 +70,8 @@
 
 import type React from "react"
 import { HardDrive, Users, Clock, Star, Trash2 } from "lucide-react"
+import { getAccountStats } from "@/lib/item.service"
+import { useEffect, useState } from "react"
 
 interface SidebarProps {
   activeItem: string
@@ -84,6 +86,40 @@ const Sidebar: React.FC<SidebarProps> = ({ activeItem, onItemClick }) => {
     { id: "starred", label: "Starred", icon: Star },
     { id: "trash", label: "Trash", icon: Trash2 },
   ]
+  const [used, setUsed] = useState("0 B")
+  const [total, setTotal] = useState("1 GB") // assume default quota
+  const [percentUsed, setPercentUsed] = useState(0)
+
+
+  useEffect(()=>{
+    const fetchStats = async ()=>{
+      try{
+        const stats = await getAccountStats();
+        setUsed(stats.storageUsed);
+
+        const quotaBytes = 1 * 1024 * 1024 * 1024 // 1GB
+        setTotal("1 GB")
+
+
+        // calculate %
+        const usedValue = parseFloat(stats.storageUsed)
+        const isGB = stats.storageUsed.includes("GB")
+        const isMB = stats.storageUsed.includes("MB")
+        const isKB = stats.storageUsed.includes("KB")
+
+        let usedBytes = 0
+        if (isGB) usedBytes = usedValue * 1024 * 1024 * 1024
+        else if (isMB) usedBytes = usedValue * 1024 * 1024
+        else if (isKB) usedBytes = usedValue * 1024
+        else usedBytes = usedValue
+
+        setPercentUsed(Math.min(100, (usedBytes / quotaBytes) * 100))
+      }catch(err){
+        console.error("Failed to load storage:", err)
+      }
+    }
+    fetchStats()
+  },[])
 
   return (
     <div className="w-60 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-full flex flex-col">
@@ -123,16 +159,16 @@ const Sidebar: React.FC<SidebarProps> = ({ activeItem, onItemClick }) => {
       <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
         <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">Storage</div>
         <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
-          <span>15 GB</span>
+          <span>{total}</span>
         </div>
         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
           <div
             className="bg-black dark:bg-blue-500 h-2 rounded-full"
-            style={{ width: "68%" }}
+            style={{ width:   `${percentUsed}` }}
           ></div>
         </div>
         <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-          10.2 GB of 15 GB used
+          {used} of {total} used
         </div>
         <button className="flex items-center text-sm text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">
           <div className="w-4 h-4 border border-gray-400 dark:border-gray-600 rounded mr-2"></div>

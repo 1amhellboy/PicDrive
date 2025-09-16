@@ -181,6 +181,16 @@ function Auth() {
                     id="password" name="password" type="password" value={loginData.password} onChange={handleLoginChange}
                     className="h-12 border-gray-200 focus:border-gray-400" required
                   />
+                  <div className="mt-1">
+                    <p className="text-gray-600">
+                      <>
+                      {/* Forgot Password? {" "} */}
+                      <button onClick={handleNavigateToLogin} className="text-blue-600 hover:text-blue-700 font-small text-sm">
+                      Forgot password ?
+                    </button>
+                    </>
+                    </p>
+                  </div>
                 </div>
 
                 <Button type="submit" disabled={loading} className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium disabled:opacity-50">
